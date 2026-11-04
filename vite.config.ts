@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 // Cornerstone's DICOM image loader ships WASM codecs and a module worker.
 // They are bundled with the app (no CDN), see docs/ARCHITEKTUR.md.
 export default defineConfig({
+  // relative asset paths: works under any sub-path (e.g. GitHub Pages /dicomview/)
+  base: './',
   plugins: [react()],
   // xmlbuilder2 (transitive dependency) expects Node's EventEmitter
   resolve: { alias: { events: 'events/' } },

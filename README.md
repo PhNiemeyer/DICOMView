@@ -24,6 +24,10 @@ Danach `http://localhost:4173` in Chrome (primär) oder Safari öffnen. Für die
 
 Der Ordner `dist/` ist eine rein statische Website. Er lässt sich von jedem beliebigen Webserver ausliefern; Patientendaten erreichen diesen Server dabei nie. Wichtig: Der Zugriff muss über `http://localhost` oder HTTPS erfolgen. IndexedDB, Web Workers und WASM setzen einen sicheren Kontext voraus, `file://` funktioniert nicht.
 
+### Veröffentlichung (GitHub Pages)
+
+Bei jedem Push auf `main` baut `.github/workflows/pages.yml` die App und veröffentlicht `dist/` auf GitHub Pages (`https://phniemeyer.github.io/dicomview/`). Einmalig nötig: *Settings → Pages → Build and deployment → Source: GitHub Actions*. Die Seite enthält nur den Programmcode – Bilder und Patientendaten verlassen auch dort nie das Gerät.
+
 ### Tests
 
 ```bash
