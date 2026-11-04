@@ -1,0 +1,5 @@
+node_modules/
+dist/
+testdata/
+test-results/
+*.log

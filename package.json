@@ -1,0 +1,39 @@
+{
+  "name": "bildviewer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "testdata": "python3 -I tools/make_testdata.py testdata",
+    "e2e": "node tools/e2e-acceptance.mjs test-results"
+  },
+  "dependencies": {
+    "@cornerstonejs/core": "^5.15.1",
+    "@cornerstonejs/dicom-image-loader": "^5.15.1",
+    "@cornerstonejs/tools": "^5.15.1",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource/dm-sans": "^5.3.0",
+    "@zip.js/zip.js": "^2.24.0",
+    "dicom-parser": "^1.8.21",
+    "events": "^3.3.0",
+    "fflate": "^0.8.3",
+    "idb": "^8.0.4",
+    "lucide-react": "^1.67.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  }
+}
