@@ -70,7 +70,7 @@ Für einen Screenshot wird das Bildfeld in einer **separaten, unsichtbaren Rende
 ## Datenschutz-Maßnahmen
 
 - Content-Security-Policy (`connect-src 'self'`) blockiert Verbindungen zu Fremd-Hosts, auch versehentliche.
-- Keine Patientendaten in URLs (keine Routen mit IDs), Dateinamen (neutral, `bildviewer_JJJJMMTT-hhmmss`) oder Konsolenausgaben der App.
+- Keine Patientendaten in URLs (keine Routen mit IDs), Dateinamen (neutral, `dicomview_JJJJMMTT-hhmmss`) oder Konsolenausgaben der App.
 - Fehlermeldungen beim Import nennen nur den Dateipfad innerhalb der Auswahl des Nutzers.
 - Einstellungen in `localStorage` enthalten nur Sprache, Limit, Löschzeit, Stil und Overlay-Schalter. Der einzige weitere Wert ist der Zeitstempel des ersten Speicherns, den die Löschlogik braucht.
 

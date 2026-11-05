@@ -165,7 +165,9 @@ export default function App() {
             ))}
             {!hasData && (
               <div className="empty-hint">
-                <Upload size={36} strokeWidth={1.25} />
+                <span className="empty-eyebrow">{t('appName')}</span>
+                <span className="empty-bar" />
+                <Upload size={40} strokeWidth={1.25} className="empty-icon" />
                 <h2>{t('emptyTitle')}</h2>
                 <p>{t('dropHint')}</p>
                 <p className="small">{t('emptyText')}</p>

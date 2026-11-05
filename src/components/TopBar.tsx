@@ -4,7 +4,7 @@ import { useStore, type Layout } from '../core/store';
 import { nextPurgeAt } from '../core/purge';
 import { t } from '../core/i18n';
 
-const ICON = { size: 18, strokeWidth: 1.5 };
+const ICON = { size: 20, strokeWidth: 1.5 };
 
 export default function TopBar({ onFiles }: { onFiles: (list: FileList | null) => void }) {
   const layout = useStore((s) => s.layout);
@@ -25,16 +25,11 @@ export default function TopBar({ onFiles }: { onFiles: (list: FileList | null) =
 
   return (
     <header className="topbar">
-      <div className="brand">
-        <span className="brand-bar" />
-        <span className="brand-name">{t('appName')}</span>
-        <span className="brand-note">{t('notDiagnostic')}</span>
-      </div>
       <div className="top-actions">
-        <button className="top-btn" onClick={() => fileRef.current?.click()}>
+        <button className="top-btn" title={t('importFiles')} onClick={() => fileRef.current?.click()}>
           <FilePlus {...ICON} /> {t('importFiles')}
         </button>
-        <button className="top-btn" onClick={() => dirRef.current?.click()}>
+        <button className="top-btn" title={t('importFolder')} onClick={() => dirRef.current?.click()}>
           <FolderOpen {...ICON} /> {t('importFolder')}
         </button>
         <input ref={fileRef} type="file" multiple hidden onChange={(e) => { onFiles(e.target.files); e.target.value = ''; }} />
@@ -56,13 +51,13 @@ export default function TopBar({ onFiles }: { onFiles: (list: FileList | null) =
           ))}
         </div>
         <span className="top-sep" />
-        <button className="top-btn" disabled={!hasActive} onClick={() => set({ mprSeries: useStore.getState().viewportSeries[useStore.getState().activeViewport] })}>
+        <button className="top-btn" title={t('mpr')} disabled={!hasActive} onClick={() => set({ mprSeries: useStore.getState().viewportSeries[useStore.getState().activeViewport] })}>
           <Axis3d {...ICON} /> {t('mpr')}
         </button>
-        <button className="top-btn" disabled={!hasActive} onClick={() => set({ dialog: 'export' })}>
+        <button className="top-btn" title={t('exportImage')} disabled={!hasActive} onClick={() => set({ dialog: 'export' })}>
           <Camera {...ICON} /> {t('exportImage')}
         </button>
-        <button className="top-btn" disabled={!hasActive} onClick={() => set({ dialog: 'video' })}>
+        <button className="top-btn" title={t('exportVideo')} disabled={!hasActive} onClick={() => set({ dialog: 'video' })}>
           <Video {...ICON} /> {t('exportVideo')}
         </button>
         <span className="top-sep" />
@@ -73,7 +68,7 @@ export default function TopBar({ onFiles }: { onFiles: (list: FileList | null) =
         >
           {autoPurge ? (next ? t('autoPurgeOn', { t: new Date(next).toLocaleTimeString(lang === 'de' ? 'de-DE' : 'en-GB', { hour: '2-digit', minute: '2-digit' }) }) : t('autoPurgeNoData')) : t('autoPurgeOff').split('–')[0]}
         </button>
-        <button className="top-btn" aria-label={t('language')} title={t('language')} onClick={() => useStore.getState().setSettings({ lang: lang === 'de' ? 'en' : 'de' })}>
+        <button className="top-btn lang" aria-label={t('language')} title={t('language')} onClick={() => useStore.getState().setSettings({ lang: lang === 'de' ? 'en' : 'de' })}>
           {lang === 'de' ? 'EN' : 'DE'}
         </button>
         <button className="top-btn icon" aria-label={t('settings')} title={t('settings')} onClick={() => set({ dialog: 'settings' })}>
@@ -82,6 +77,13 @@ export default function TopBar({ onFiles }: { onFiles: (list: FileList | null) =
         <button className="top-btn icon" aria-label={t('properties')} title={t('properties')} onClick={() => set({ rightOpen: !useStore.getState().rightOpen })}>
           <PanelRight {...ICON} />
         </button>
+      </div>
+      <div className="brand" aria-label={t('appName')}>
+        <div className="brand-text">
+          <span className="brand-name">{t('appName')}</span>
+          <span className="brand-note">{t('notDiagnostic')}</span>
+        </div>
+        <span className="brand-bar" />
       </div>
     </header>
   );

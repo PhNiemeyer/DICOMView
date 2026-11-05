@@ -1,7 +1,7 @@
 import type { Lang } from './settings';
 
 const de = {
-  appName: 'Bildviewer',
+  appName: 'DICOMView',
   notDiagnostic: 'Nicht für die diagnostische Befundung',
   import: 'Importieren',
   importFiles: 'Dateien…',
@@ -263,7 +263,7 @@ const de = {
 export type DictKey = keyof typeof de;
 
 const en: Record<DictKey, string> = {
-  appName: 'Bildviewer',
+  appName: 'DICOMView',
   notDiagnostic: 'Not for diagnostic reading',
   import: 'Import',
   importFiles: 'Files…',

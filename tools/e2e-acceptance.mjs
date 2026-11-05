@@ -286,7 +286,7 @@ const res = await page.locator('.export-form .strong').innerText();
 const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Herunterladen' }).click()]);
 const file = `${OUT}/export-${dl.suggestedFilename()}`;
 await dl.saveAs(file);
-ok('Neutraler Dateiname ohne Patientendaten', /^bildviewer_\d{8}-\d{6}\.png$/.test(dl.suggestedFilename()), dl.suggestedFilename());
+ok('Neutraler Dateiname ohne Patientendaten', /^dicomview_\d{8}-\d{6}\.png$/.test(dl.suggestedFilename()), dl.suggestedFilename());
 await page.keyboard.press('Escape');
 // analyse PNG in python: masked area uniform black even after brightening, original resolution
 const analysis = execFileSync('python3', ['-I', '-c', `

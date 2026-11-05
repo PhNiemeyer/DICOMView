@@ -206,7 +206,7 @@ export async function renderExport(opts: ExportOptions): Promise<HTMLCanvasEleme
 export function neutralFileName(ext: string) {
   const d = new Date();
   const p = (n: number) => String(n).padStart(2, '0');
-  return `bildviewer_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.${ext}`;
+  return `dicomview_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.${ext}`;
 }
 
 export function downloadBlob(blob: Blob, name: string) {

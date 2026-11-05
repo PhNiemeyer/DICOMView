@@ -1,6 +1,6 @@
-# Bildviewer
+# DICOMView
 
-„Bildviewer“ ist ein Platzhaltername. Die Anwendung ist ein webbasierter DICOM- und Bildviewer, mit dem sich Vorträge und Publikationen vorbereiten lassen. **Sie ist nicht für die diagnostische Befundung gedacht.**
+DICOMView ist ein webbasierter DICOM- und Bildviewer, mit dem sich Vorträge und Publikationen vorbereiten lassen. **Sie ist nicht für die diagnostische Befundung gedacht.**
 
 Alle Bilder, Metadaten, Messungen und Exporte werden ausschließlich lokal im Browser verarbeitet. Es gibt keinen Server für Patientendaten, keine Analyse-, KI- oder OCR-Dienste und keine CDN-Abhängigkeiten. Die Content-Security-Policy in `index.html` lässt nur Verbindungen zur eigenen Herkunft zu.
 
