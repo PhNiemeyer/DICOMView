@@ -36,6 +36,8 @@ Bei jedem Push auf `main` baut `.github/workflows/pages.yml` die App und veröff
 SITE_ADDRESS=203-0-113-10.sslip.io docker compose -f deploy/docker-compose.yml up -d
 ```
 
+Automatische Updates: Der Dienst `updater` prüft alle 5 Minuten, ob im Release `site-latest` ein neues Paket liegt, und tauscht die ausgelieferte Version dann ohne Neustart aus. Ein Push auf `main` ist damit nach Build (ca. 1–2 Min.) plus spätestens 5 Minuten live. Das Intervall lässt sich über `INTERVAL` (Sekunden) ändern.
+
 Ports 80 und 443 müssen frei und in der Firewall offen sein. HTTPS ist Pflicht (IndexedDB-/Krypto-/Tab-Funktionen brauchen einen sicheren Kontext).
 
 ### Tests
