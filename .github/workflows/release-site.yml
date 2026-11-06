@@ -1,0 +1,36 @@
+name: Publish site package (for VPS)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-site
+  cancel-in-progress: true
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Pack site + Caddyfile
+        run: |
+          mkdir -p pkg && cp -r dist pkg/site && cp deploy/Caddyfile pkg/Caddyfile
+          tar -czf dicomview-site.tar.gz -C pkg .
+      - name: Replace release "site-latest"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete site-latest --cleanup-tag -y || true
+          gh release create site-latest dicomview-site.tar.gz --title "Site package (latest main)" --notes "Built from ${GITHUB_SHA}. Used by deploy/docker-compose.yml." --latest=false

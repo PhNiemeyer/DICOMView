@@ -1,6 +1,6 @@
 # SITE_ADDRESS: e.g. 203-0-113-10.sslip.io (free hostname that resolves to the VPS IP)
 {$SITE_ADDRESS:localhost} {
-	root * /srv
+	root * {$SITE_ROOT:/srv}
 	encode zstd gzip
 	file_server
 	header {

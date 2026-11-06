@@ -30,10 +30,10 @@ Bei jedem Push auf `main` baut `.github/workflows/pages.yml` die App und veröff
 
 ### Eigener Server (Docker, z. B. Hostinger VPS)
 
-`deploy/docker-compose.yml` baut die App direkt aus diesem GitHub-Repository und liefert sie mit Caddy aus – inklusive automatischem HTTPS-Zertifikat (Let's Encrypt). Ohne eigene Domain eignet sich die kostenlose Adresse `<IP mit Bindestrichen>.sslip.io` (z. B. `203-0-113-10.sslip.io`):
+`deploy/docker-compose.yml` lädt das fertig gebaute Paket aus dem GitHub-Release `site-latest` (wird bei jedem Push auf `main` neu erzeugt) und liefert es mit Caddy aus – inklusive automatischem HTTPS-Zertifikat (Let's Encrypt). Ohne eigene Domain eignet sich die kostenlose Adresse `<IP mit Bindestrichen>.sslip.io` (z. B. `203-0-113-10.sslip.io`):
 
 ```bash
-SITE_ADDRESS=203-0-113-10.sslip.io docker compose -f deploy/docker-compose.yml up -d --build
+SITE_ADDRESS=203-0-113-10.sslip.io docker compose -f deploy/docker-compose.yml up -d
 ```
 
 Ports 80 und 443 müssen frei und in der Firewall offen sein. HTTPS ist Pflicht (IndexedDB-/Krypto-/Tab-Funktionen brauchen einen sicheren Kontext).

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Hostinger_Connector__search",
+      "mcp__Hostinger_Connector__execute",
+      "mcp__Hostinger_Connector__multi-execute",
+      "mcp__plugin_hostinger_hostinger"
+    ]
+  }
+}

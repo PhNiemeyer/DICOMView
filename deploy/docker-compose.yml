@@ -1,19 +1,35 @@
-# Deploy on any Docker host (e.g. Hostinger VPS Docker Manager).
+# Deploy on any Docker host (e.g. Hostinger VPS Docker Manager). No build on the server:
+# the "fetch" service downloads the prebuilt site package from the GitHub release "site-latest".
 # Set SITE_ADDRESS to "<ip-with-dashes>.sslip.io" or your own domain.
 services:
-  dicomview:
-    build: https://github.com/PhNiemeyer/DICOMView.git#main
+  fetch:
+    image: alpine:3.20
+    command: >
+      sh -c "rm -rf /app/* && wget -qO- https://github.com/PhNiemeyer/DICOMView/releases/download/site-latest/dicomview-site.tar.gz | tar -xz -C /app && ls /app"
+    volumes:
+      - app:/app
+    restart: "no"
+
+  web:
+    image: caddy:2-alpine
+    depends_on:
+      fetch:
+        condition: service_completed_successfully
+    command: caddy run --config /app/Caddyfile --adapter caddyfile
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+      SITE_ROOT: /app/site
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp"
     volumes:
+      - app:/app:ro
       - caddy_data:/data
       - caddy_config:/config
     restart: unless-stopped
 
 volumes:
+  app:
   caddy_data:
   caddy_config:
