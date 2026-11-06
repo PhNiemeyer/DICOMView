@@ -1,0 +1,22 @@
+# SITE_ADDRESS: e.g. 203-0-113-10.sslip.io (free hostname that resolves to the VPS IP)
+{$SITE_ADDRESS:localhost} {
+	root * /srv
+	encode zstd gzip
+	file_server
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		X-Frame-Options "DENY"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+	@hashed path /assets/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	@html path / /index.html
+	header @html Cache-Control "no-cache"
+	# no access log: requests contain no patient data, but keep the server quiet anyway
+	log {
+		output discard
+	}
+}

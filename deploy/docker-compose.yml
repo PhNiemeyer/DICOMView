@@ -1,0 +1,19 @@
+# Deploy on any Docker host (e.g. Hostinger VPS Docker Manager).
+# Set SITE_ADDRESS to "<ip-with-dashes>.sslip.io" or your own domain.
+services:
+  dicomview:
+    build: https://github.com/PhNiemeyer/DICOMView.git#main
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
