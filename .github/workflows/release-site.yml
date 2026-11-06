@@ -28,9 +28,10 @@ jobs:
         run: |
           mkdir -p pkg && cp -r dist pkg/site && cp deploy/Caddyfile pkg/Caddyfile
           tar -czf dicomview-site.tar.gz -C pkg .
-      - name: Replace release "site-latest"
+      - name: Update release "site-latest" in place (no download gap)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete site-latest --cleanup-tag -y || true
-          gh release create site-latest dicomview-site.tar.gz --title "Site package (latest main)" --notes "Built from ${GITHUB_SHA}. Used by deploy/docker-compose.yml." --latest=false
+          gh release view site-latest >/dev/null 2>&1 || gh release create site-latest --title "Site package (latest main)" --notes "Used by deploy/docker-compose.yml." --latest=false
+          gh release upload site-latest dicomview-site.tar.gz --clobber
+          gh release edit site-latest --notes "Built from ${GITHUB_SHA}. Used by deploy/docker-compose.yml."
