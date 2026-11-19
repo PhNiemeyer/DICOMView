@@ -151,12 +151,12 @@ await tool('Länge');
 await drag(0, [200, 400], [700, 400]);
 await setPoints([[200, 400], [700, 400]]);
 let txt = await svgText();
-ok('Länge DX (500 px × 0,1 mm Imager Spacing = 50,0 mm)', /50,0 mm/.test(txt), txt);
+ok('Länge DX (500 px × 0,1 mm Imager Spacing = 50 mm, ganze Zahl)', /(^|\D)50 mm/.test(txt), txt);
 await page.getByRole('tab', { name: 'Vergrößerungsfaktor 1,1' }).click();
 await page.getByRole('button', { name: 'Faktor 1,1 anwenden' }).click();
 await page.waitForTimeout(400);
 txt = await svgText();
-ok('Vergrößerungsfaktor 1,1: 50,0 → 45,5 mm, gekennzeichnet', /45,5 mm \(÷1,1\)/.test(txt), txt);
+ok('Vergrößerungsfaktor 1,1: 50 → 45 mm, gekennzeichnet', /(^|\D)45 mm \(÷1,1\)/.test(txt), txt);
 const flag = await page.locator('[data-vp="0"] .vp-info.bl').innerText();
 ok('Aktive Annahme im Bildfeld sichtbar', /1\/1,1/.test(flag), flag);
 
@@ -175,7 +175,7 @@ const geo = await page.evaluate(() => {
   const pts = [[+line.getAttribute('x1'), +line.getAttribute('y1')], [+line.getAttribute('x2'), +line.getAttribute('y2')]];
   return Math.min(...pts.map((p) => Math.hypot(p[0] - expect[0], p[1] - expect[1])));
 });
-ok('Messung bleibt bei Drehen/Spiegeln/Zoom/Verschieben am Bildpunkt und korrekt', /45,5 mm/.test(txt) && geo < 2, `Abweichung ${geo.toFixed(2)} px`);
+ok('Messung bleibt bei Drehen/Spiegeln/Zoom/Verschieben am Bildpunkt und korrekt', /(^|\D)45 mm/.test(txt) && geo < 2, `Abweichung ${geo.toFixed(2)} px`);
 await shot('03-dx-transform');
 await page.keyboard.press('0');
 
@@ -186,7 +186,7 @@ await tool('Länge');
 await drag(0, [200, 400], [700, 400]);
 await setPoints([[200, 400], [700, 400]]);
 txt = await svgText();
-ok('ERMF berücksichtigt (50 mm ÷ 1,1 = 45,5 mm)', /45,5 mm/.test(txt) && !/÷1,1/.test(txt), txt);
+ok('ERMF berücksichtigt (50 mm ÷ 1,1 = 45 mm)', /(^|\D)45 mm/.test(txt) && !/÷1,1/.test(txt), txt);
 await page.getByRole('tab', { name: 'Vergrößerungsfaktor 1,1' }).click();
 ok('Faktor 1,1 bei bereits korrigierter Vergrößerung gesperrt', await page.getByText('Nicht anwendbar').isVisible());
 
@@ -204,7 +204,7 @@ ok('Referenzkugel: Zusammenfassung vor Übernahme', /0,1250 mm\/px/.test(sum), s
 await page.getByRole('button', { name: 'Übernehmen' }).click();
 await page.waitForTimeout(400);
 txt = await svgText();
-ok('Referenzkugel-Kalibrierung angewendet (Kreis Ø 25,0 mm)', /Ø 25,0 mm/.test(txt), txt);
+ok('Referenzkugel-Kalibrierung angewendet (Kreis Ø 25 mm)', /Ø 25 mm/.test(txt), txt);
 
 // ---------- 5. JPEG: pixels only, 1.1 refused, known distance ----------
 await page.locator('.pat', { hasText: 'Fotos Testperson' }).locator('.study-main').first().click();
@@ -225,12 +225,12 @@ await page.getByRole('button', { name: 'Zusammenfassung' }).click();
 await page.getByRole('button', { name: 'Übernehmen' }).click();
 await page.waitForTimeout(400);
 txt = await svgText();
-ok('Bekannte Strecke: 100 px ≙ 10 mm → 10,0 mm', /10,0 mm/.test(txt), txt);
+ok('Bekannte Strecke: 100 px ≙ 10 mm → 10 mm', /(^|\D)10 mm/.test(txt), txt);
 await tool('Kreis');
 await drag(0, [400, 200], [500, 200]);
 await setPoints([[400, 200], [500, 200]]);
 txt = await svgText();
-ok('Kreis nach Kalibrierung (200 px → Ø 20,0 mm)', /Ø 20,0 mm/.test(txt), txt);
+ok('Kreis nach Kalibrierung (200 px → Ø 20 mm)', /Ø 20 mm/.test(txt), txt);
 
 // angles
 await clearAnnotations();
@@ -242,7 +242,7 @@ for (const p of [[100, 100], [200, 200], [300, 100]]) {
 }
 await setPoints([[100, 100], [200, 200], [300, 100]]);
 txt = await svgText();
-ok('Dreipunktwinkel 90°', /90,0°/.test(txt), txt);
+ok('Dreipunktwinkel 90° (ganze Zahl)', /(^|\D)90°/.test(txt), txt);
 await clearAnnotations();
 await tool('2-Linien-Winkel');
 await drag(0, [50, 300], [150, 300]);
@@ -250,12 +250,12 @@ await drag(0, [350, 50], [350 + 86.6025, 50 + 50]);
 await setPoints([[50, 300], [150, 300], [350, 50], [350 + 86.60254, 100]]);
 await page.waitForTimeout(300);
 txt = await svgText();
-ok('Zweilinienwinkel ohne Berührung: Innenwinkel 30,0°', /30,0° \(innen\)/.test(txt), txt);
+ok('Zweilinienwinkel ohne Berührung: Innenwinkel 30°', /(^|\D)30° \(innen\)/.test(txt), txt);
 await selectLastAnnotation();
 await page.locator('.psec', { hasText: 'Ausgewählte Messung' }).locator('label', { hasText: 'Angezeigter Winkel' }).locator('select').selectOption('both');
 await page.waitForTimeout(300);
 txt = await svgText();
-ok('Ergänzungswinkel eindeutig wählbar (150,0°)', /150,0° \(Ergänzung\)/.test(txt), txt);
+ok('Ergänzungswinkel eindeutig wählbar (150°)', /150° \(Ergänzung\)/.test(txt), txt);
 await page.locator('.psec', { hasText: 'Ausgewählte Messung' }).locator('.swatches').first().locator('.swatch').nth(2).click();
 await page.waitForTimeout(300);
 const stroke = await page.locator('[data-vp="0"] svg line').first().getAttribute('stroke');

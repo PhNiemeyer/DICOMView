@@ -41,7 +41,8 @@ function ctx(data: any, targetId: string | string[]) {
 
 function lenText(v: number, cal: ReturnType<typeof calibrationForImageId>) {
   if (!cal) return `${fmtNum(v, 0)} ${t('pixelUnit')}`;
-  return `${fmtNum(v, 1)} mm${cal.magnification11 ? ' (÷1,1)' : ''}`;
+  // whole numbers only (mm and degrees)
+  return `${fmtNum(v, 0)} mm${cal.magnification11 ? ' (÷1,1)' : ''}`;
 }
 
 export function lengthText(data: any, targetId: string) {
@@ -56,7 +57,7 @@ export function angleText(data: any, targetId: string) {
   const c = ctx(data, targetId);
   if (!c || c.pts.length < 3) return [];
   const a = angle3(c.pts[0], c.pts[1], c.pts[2], c.aspectScale);
-  return Number.isFinite(a) ? [`${fmtNum(a, 1)}°`] : [];
+  return Number.isFinite(a) ? [`${fmtNum(a, 0)}°`] : [];
 }
 
 export type AngleMode = 'acute' | 'obtuse' | 'both';
@@ -68,8 +69,10 @@ export function cobbText(data: any, targetId: string) {
   const { inner, supplementary } = angleBetweenLines(c.pts[0], c.pts[1], c.pts[2], c.pts[3], c.aspectScale);
   if (!Number.isFinite(inner)) return [];
   const mode: AngleMode = data.bvAngleMode ?? 'acute';
-  const i = `${fmtNum(inner, 1)}° (${t('acuteShort')})`;
-  const s = `${fmtNum(supplementary, 1)}° (${t('obtuseShort')})`;
+  // rounded so that both values always add up to 180°
+  const innerR = Math.round(inner);
+  const i = `${fmtNum(innerR, 0)}° (${t('acuteShort')})`;
+  const s = `${fmtNum(180 - innerR, 0)}° (${t('obtuseShort')})`;
   return mode === 'acute' ? [i] : mode === 'obtuse' ? [s] : [i, s];
 }
 
