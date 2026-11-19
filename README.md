@@ -73,6 +73,26 @@ Führt den Browser-Abnahmetest aus (Playwright/Chromium). Vorher muss `npm run p
 | Aktives Bildfeld | in das Bildfeld klicken (Teal-Rahmen) | – |
 | Serie in ein Bildfeld laden | Vorschau anklicken (aktives Feld) oder in ein Feld ziehen | – |
 
+## Messungs-Optionen und Überlagerung
+
+Im Eigenschaften-Bereich unter **„Messungen“**:
+
+- **Messung über Einzelbild hinaus sichtbar machen:** Messungen bleiben beim Blättern auf allen Bildern derselben Serie sichtbar. Dort erscheinen sie gestrichelt, nur zur Anzeige, mit dem Wert vom Ursprungsbild. So lässt sich auf einem anderen Bild weitermessen, etwa eine zweite Linie oder ein Winkel. Bearbeitet wird auf dem Ursprungsbild. Ist die Option aktiv, sind die mitgeführten Messungen auch in Screenshot und Video enthalten.
+- **Messwerte als Zahl anzeigen:** standardmäßig an. Abgewählt erscheinen nur Linien und Kreise ohne Zahl; das gilt auch im Export.
+- **Alle Annotationen löschen:** wahlweise nur für die aktuelle Serie oder für alle Untersuchungen. Masken zur Anonymisierung bleiben erhalten.
+- **Schriftfarbe, Schriftart und Schriftgröße** gelten für neue Messungen und lassen sich unter „Ausgewählte Messung“ für einzelne Messungen ändern.
+
+**Überlagern** (Werkzeugleiste):
+
+1. Der Modus schaltet auf zwei Bildfelder.
+2. Links zum gewünschten Bild blättern und „Bild zur Überlagerung übernehmen“ wählen. Das Bild erscheint rechts.
+3. Links zur zweiten Ebene blättern (auch aus einer anderen Serie) und „2. Ebene zur Überlagerung auswählen“ wählen. Sie wird rechts mit 50 % Deckkraft über das erste Bild gelegt; die Deckkraft ist per Regler einstellbar.
+4. Die Messwerkzeuge funktionieren rechts weiter.
+5. „Überlagerung zur weiteren Überarbeitung übernehmen“ wechselt in ein einzelnes Bildfeld.
+6. Danach ist „Überlagerung exportieren“ farblich hervorgehoben und speichert ein JPEG, mit oder ohne Annotationen.
+
+Das zweite Bild wird mit seiner aktuellen Fensterung und seinen Masken übernommen. Es wird ohne Registrierung zentriert in die Ausdehnung des ersten Bildes eingepasst. Eine automatische geometrische Ausrichtung gibt es nicht.
+
 ## Unterstützte Formate
 
 - **DICOM Part 10** (mit oder ohne Dateiendung) und **DICOM-Datensätze ohne Präambel/Meta-Header** (implicit und explicit VR). Sie werden lokal um einen gültigen Header ergänzt.

@@ -18,7 +18,8 @@ import {
   subscribe,
   updateMasks,
 } from '../cs/registry';
-import { annotationPixelVector, type AngleMode } from '../cs/measure';
+import { annotationPixelVector, measureDisplay, type AngleMode } from '../cs/measure';
+import { FONT_FAMILIES, FONT_SIZES } from '../core/settings';
 import { calibrationFromDistance, canApplyMagnification, nativeAspect } from '../cs/calibration';
 import type { Calibration } from '../core/types';
 import { persistAnnotation, styleFor } from '../cs/series';
@@ -91,7 +92,7 @@ export default function RightPanel() {
       </div>
       <div className="side-scroll panel-body">
         <WindowSection />
-        <StyleSection />
+        <MeasurementsSection />
         <SelectionSection />
         {key && <CalibrationSection key={key} instKey={key} />}
         {key && <MaskSection instKey={key} />}
@@ -162,16 +163,82 @@ function Widths({ value, onChange }: { value: number; onChange: (w: number) => v
   );
 }
 
-function StyleSection() {
+function TextStyleFields({ color, font, size, onChange }: { color: string; font: string; size: number; onChange: (p: { textColor?: string; fontFamily?: string; fontSize?: number }) => void }) {
+  return (
+    <div className="text-style">
+      <div className="field">
+        <span>{t('textColor')}</span>
+        <Swatches value={color} onChange={(c) => onChange({ textColor: c })} label={t('textColor')} />
+      </div>
+      <div className="row2">
+        <label>
+          <span>{t('fontFamily')}</span>
+          <select value={font} onChange={(e) => onChange({ fontFamily: e.target.value })}>
+            {FONT_FAMILIES.map((f) => (
+              <option key={f.value} value={f.value} style={{ fontFamily: f.css }}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>{t('fontSize')}</span>
+          <select value={size} onChange={(e) => onChange({ fontSize: parseInt(e.target.value, 10) })}>
+            {FONT_SIZES.map((n) => (
+              <option key={n} value={n}>
+                {n} px
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+    </div>
+  );
+}
+
+function MeasurementsSection() {
   const color = useStore((s) => s.newColor);
   const lw = useStore((s) => s.newLineWidth);
   const mode = useStore((s) => s.newAngleMode);
+  const settings = useStore((s) => s.settings);
   const set = useStore((s) => s.set);
+  const setSettings = useStore((s) => s.setSettings);
   return (
     <section className="psec">
-      <h3>{t('style')}</h3>
+      <h3>{t('measurements')}</h3>
+      <label className="check">
+        <input
+          type="checkbox"
+          checked={settings.persistAcrossSlices}
+          onChange={(e) => setSettings({ persistAcrossSlices: e.target.checked })}
+        />
+        <span>{t('persistAcross')}</span>
+      </label>
+      <p className="hint">{t('persistAcrossHint')}</p>
+      <label className="check">
+        <input
+          type="checkbox"
+          checked={settings.showValues}
+          onChange={(e) => {
+            setSettings({ showValues: e.target.checked });
+            measureDisplay.showValues = e.target.checked;
+            renderAllAnnotations();
+          }}
+        />
+        <span>{t('showValues')}</span>
+      </label>
+      <button className="btn danger small del-all" onClick={() => set({ deleteAllOpen: true })}>
+        <Trash {...ICON} /> {t('deleteAllAnn')}
+      </button>
+      <h4>{t('style')}</h4>
       <Swatches value={color} onChange={(c) => set({ newColor: c })} label={t('color')} />
       <Widths value={lw} onChange={(w) => set({ newLineWidth: w })} />
+      <TextStyleFields
+        color={settings.textColor}
+        font={settings.fontFamily}
+        size={settings.fontSize}
+        onChange={(p) => setSettings(p)}
+      />
       <label className="field">
         <span>
           {t('tCobb')} – {t('angleMode')}
@@ -202,6 +269,11 @@ function SelectionSection() {
       </section>
     );
   const style = a.data.bvStyle ?? {};
+  const textOf = () => ({
+    textColor: style.textBoxColor ?? '#FFFFFF',
+    fontFamily: style.bvFont ?? 'Geist Variable',
+    fontSize: parseFloat(style.textBoxFontSize ?? '15'),
+  });
   const update = (p: any) => {
     a.data.bvStyle = { ...style, ...p };
     annotation.config.style.setAnnotationStyles(a.annotationUID, a.data.bvStyle);
@@ -211,8 +283,14 @@ function SelectionSection() {
   return (
     <section className="psec">
       <h3>{t('selection')}</h3>
-      <Swatches value={style.color ?? ''} onChange={(c) => update(styleFor(c, style.lineWidth ?? '2'))} label={t('color')} />
-      <Widths value={parseFloat(style.lineWidth ?? '2')} onChange={(w) => update(styleFor(style.color ?? '#57C8CE', w))} />
+      <Swatches value={style.color ?? ''} onChange={(c) => update(styleFor(c, style.lineWidth ?? '2', textOf()))} label={t('color')} />
+      <Widths value={parseFloat(style.lineWidth ?? '2')} onChange={(w) => update(styleFor(style.color ?? '#57C8CE', w, textOf()))} />
+      <TextStyleFields
+        color={textOf().textColor}
+        font={textOf().fontFamily}
+        size={textOf().fontSize}
+        onChange={(p) => update(styleFor(style.color ?? '#57C8CE', style.lineWidth ?? '2', { ...textOf(), ...p }))}
+      />
       {a.metadata.toolName === CobbAngleTool.toolName && (
         <label className="field">
           <span>{t('angleMode')}</span>

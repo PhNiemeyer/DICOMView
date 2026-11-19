@@ -4,6 +4,8 @@ import { Enums as ToolEnums } from '@cornerstonejs/tools';
 import { currentImageId, getViewport } from '../cs/viewportOps';
 import { imageIdToKey, masksFor } from '../cs/registry';
 import { fillMasks } from '../cs/masks';
+import { drawGhosts } from '../cs/ghosts';
+import { drawOverlayImage } from '../cs/overlay';
 import { serializeSvg, svgToImage, viewportCssSize } from './render';
 import { useStore } from '../core/store';
 
@@ -95,11 +97,16 @@ export function startRecording(opts: {
       const id = currentImageId(vp);
       const key = id && imageIdToKey.get(id);
       if (id && key) {
+        const st = useStore.getState();
+        const o = st.overlay;
         fg.save();
         fg.beginPath();
         fg.rect(ox, oy, cw * dpr, ch * dpr);
         fg.clip();
+        if (o.active && o.vpIndex === i && o.top && o.base?.imageId === id && (o.stage === 'ready' || o.stage === 'final'))
+          drawOverlayImage(fg, vp, id, o.top, o.alpha, dpr, [ox, oy]);
         fillMasks(fg, vp, id, masksFor(key), dpr, [ox, oy]);
+        if (opts.withMeasurements && st.settings.persistAcrossSlices && st.measurementsVisible) drawGhosts(fg, vp, id, dpr, [ox, oy]);
         fg.restore();
       }
       if (opts.withMeasurements) {

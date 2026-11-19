@@ -6,6 +6,8 @@ import { EXPORT_TOOLGROUP, MEASUREMENT_TOOLS } from '../cs/init';
 import { currentImageId, getViewport, imageToCanvas } from '../cs/viewportOps';
 import { imageIdToKey, masksFor } from '../cs/registry';
 import { fillMasks } from '../cs/masks';
+import { drawGhosts } from '../cs/ghosts';
+import { drawOverlayImage } from '../cs/overlay';
 import { useStore } from '../core/store';
 
 export const MAX_SIDE = 8192;
@@ -120,9 +122,17 @@ export async function renderViewport(i: number, factor: number, withMeasurements
     await nextFrame();
     g.drawImage(vp.getCanvas(), 0, 0, out.width, out.height);
 
+    // semi-transparent overlay image (overlay mode)
+    const st = useStore.getState();
+    const o = st.overlay;
+    if (o.active && o.vpIndex === i && o.top && o.base?.imageId === imageId && (o.stage === 'ready' || o.stage === 'final'))
+      drawOverlayImage(g, vp, imageId, o.top, o.alpha, factor);
+
     // masks: replace pixels opaquely (independent of "with measurements")
     const key = imageIdToKey.get(imageId);
     if (key) fillMasks(g, vp, imageId, masksFor(key), factor);
+    // measurements carried over from other images of the series
+    if (withMeasurements && st.settings.persistAcrossSlices && st.measurementsVisible) drawGhosts(g, vp, imageId, factor);
 
     if (withMeasurements) {
       tg.addViewport(viewportId, engine.id);

@@ -21,13 +21,21 @@ async function boot() {
   await initCornerstone();
   installAnnotationPersistence(() => {
     const s = useStore.getState();
-    return { color: s.newColor, lineWidth: s.newLineWidth, angleMode: s.newAngleMode, visible: s.measurementsVisible };
+    return {
+      color: s.newColor,
+      lineWidth: s.newLineWidth,
+      angleMode: s.newAngleMode,
+      visible: s.measurementsVisible,
+      text: { textColor: s.settings.textColor, fontFamily: s.settings.fontFamily, fontSize: s.settings.fontSize },
+    };
   });
   if (new URLSearchParams(location.search).has('e2e')) {
     // Test hook for automated acceptance tests (local only, contains no data)
     const [ops, reg, tools, core, series] = await Promise.all([import('./cs/viewportOps'), import('./cs/registry'), import('@cornerstonejs/tools'), import('@cornerstonejs/core'), import('./cs/series')]);
     (window as any).__bv = { ops, reg, tools, core, series, store: useStore };
   }
+  const { measureDisplay } = await import('./cs/measure');
+  measureDisplay.showValues = useStore.getState().settings.showValues;
   // calibration / mask changes → re-render measurement texts
   const [{ subscribe }, { renderAllAnnotations }] = await Promise.all([import('./cs/registry'), import('./cs/viewportOps')]);
   subscribe(() => renderAllAnnotations());

@@ -191,3 +191,55 @@ export function SettingsDialog() {
     </Modal>
   );
 }
+
+// ---------------- delete all measurements ----------------
+export function DeleteAllDialog() {
+  const series = useStore((s) => s.viewportSeries[s.activeViewport]);
+  const close = () => useStore.getState().set({ deleteAllOpen: false });
+  const run = async (scope: 'series' | 'all') => {
+    const { deleteAllAnnotations } = await import('../cs/series');
+    const { renderAllAnnotations } = await import('../cs/viewportOps');
+    await deleteAllAnnotations(scope, series);
+    renderAllAnnotations();
+    useStore.getState().toast(t('deletedAllAnn'));
+    close();
+  };
+  return (
+    <Modal title={t('deleteAllAnn')} onClose={close}>
+      <p>{t('deleteAllText')}</p>
+      <p className="hint">{t('deleteAllMasksKept')}</p>
+      <div className="modal-actions">
+        <button className="btn" onClick={close}>{t('cancel')}</button>
+        <button className="btn danger" disabled={!series} onClick={() => run('series')}>{t('deleteScopeSeries')}</button>
+        <button className="btn danger" onClick={() => run('all')}>{t('deleteScopeAll')}</button>
+      </div>
+    </Modal>
+  );
+}
+
+// ---------------- export of the overlaid image ----------------
+export function OverlayExportDialog() {
+  const [busy, setBusy] = useState(false);
+  const close = () => useStore.getState().set({ overlayExportOpen: false });
+  const run = async (withAnn: boolean) => {
+    setBusy(true);
+    try {
+      const { exportOverlay } = await import('../core/overlayActions');
+      await exportOverlay(withAnn);
+      close();
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Modal title={t('ovlExport')} onClose={close}>
+      <p>{t('ovlExportText')}</p>
+      <p className="hint">{t('masksAlwaysOn')}</p>
+      <div className="modal-actions">
+        <button className="btn" onClick={close}>{t('cancel')}</button>
+        <button className="btn primary" disabled={busy} onClick={() => run(false)}>{t('ovlExportWithout')}</button>
+        <button className="btn primary" disabled={busy} onClick={() => run(true)}>{t('ovlExportWith')}</button>
+      </div>
+    </Modal>
+  );
+}

@@ -12,6 +12,13 @@ export interface Settings {
   showPatientOverlay: boolean;
   defaultColor: string;
   defaultLineWidth: number;
+  /** Measurements stay visible on all images of their series (display only). */
+  persistAcrossSlices: boolean;
+  /** Show numeric values next to measurements. */
+  showValues: boolean;
+  textColor: string;
+  fontFamily: string;
+  fontSize: number;
 }
 
 const KEY = 'bildviewer.settings.v1';
@@ -24,7 +31,26 @@ export const DEFAULT_SETTINGS: Settings = {
   showPatientOverlay: false,
   defaultColor: '#57C8CE',
   defaultLineWidth: 2,
+  persistAcrossSlices: false,
+  showValues: true,
+  textColor: '#FFFFFF',
+  fontFamily: 'Geist Variable',
+  fontSize: 15,
 };
+
+export const FONT_FAMILIES: { value: string; label: string; css: string }[] = [
+  { value: 'Geist Variable', label: 'Geist', css: "'Geist Variable', 'DM Sans', Arial, sans-serif" },
+  { value: 'DM Sans', label: 'DM Sans', css: "'DM Sans', Arial, sans-serif" },
+  { value: 'Arial', label: 'Arial', css: 'Arial, Helvetica, sans-serif' },
+  { value: 'Helvetica', label: 'Helvetica', css: 'Helvetica, Arial, sans-serif' },
+  { value: 'Times New Roman', label: 'Times New Roman', css: "'Times New Roman', Times, serif" },
+  { value: 'Courier New', label: 'Courier New', css: "'Courier New', Courier, monospace" },
+];
+export const FONT_SIZES = [10, 12, 14, 15, 16, 18, 20, 24, 28, 32];
+
+export function fontCss(value: string) {
+  return FONT_FAMILIES.find((f) => f.value === value)?.css ?? FONT_FAMILIES[0].css;
+}
 
 function navigatorLang(): Lang {
   try {

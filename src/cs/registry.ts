@@ -113,3 +113,16 @@ export function updateMasks(studyUID: string, fn: (m: Mask[]) => Mask[]) {
   saveWorkSoon(studyUID);
   notify();
 }
+
+/** Removes all stored measurements of every study (masks and calibrations are kept). */
+export async function clearAllStoredAnnotations() {
+  const { db } = await import('../core/db');
+  const d = await db();
+  const all = (await d.getAll('work')) as StudyWork[];
+  for (const w of all) {
+    w.annotations = [];
+    if (writesAllowed()) await d.put('work', w);
+  }
+  for (const w of works.values()) w.annotations = [];
+  notify();
+}

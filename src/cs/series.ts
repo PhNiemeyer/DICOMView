@@ -1,6 +1,7 @@
 import { eventTarget, utilities as csUtils, cache } from '@cornerstonejs/core';
 import dicomImageLoader from '@cornerstonejs/dicom-image-loader';
 import { annotation, Enums as ToolEnums } from '@cornerstonejs/tools';
+import { fontCss } from '../core/settings';
 import { db, getFile, getInstancesOfSeries, putThumb } from '../core/db';
 import type { DisplayImage, InstanceRec, SeriesRec } from '../core/types';
 import {
@@ -13,6 +14,7 @@ import {
   saveWorkSoon,
   seriesImages,
   workOf,
+  clearAllStoredAnnotations,
 } from './registry';
 
 const fileIdToUri = new Map<string, string>();
@@ -132,8 +134,25 @@ function persistStudyAnnotations(studyUID: string) {
 }
 
 /** Own colour also while hovered/selected (selection is shown by handles and the properties panel). */
-export function styleFor(color: string, lineWidth: number | string) {
-  return { color, colorHighlighted: color, colorSelected: color, lineWidth: String(lineWidth), textBoxColor: '#ffffff', textBoxColorHighlighted: '#ffffff', textBoxColorSelected: '#ffffff' };
+export interface TextStyle {
+  textColor: string;
+  fontFamily: string;
+  fontSize: number;
+}
+
+export function styleFor(color: string, lineWidth: number | string, text: TextStyle = { textColor: '#FFFFFF', fontFamily: 'Geist Variable', fontSize: 15 }) {
+  return {
+    color,
+    colorHighlighted: color,
+    colorSelected: color,
+    lineWidth: String(lineWidth),
+    textBoxColor: text.textColor,
+    textBoxColorHighlighted: text.textColor,
+    textBoxColorSelected: text.textColor,
+    textBoxFontFamily: fontCss(text.fontFamily),
+    textBoxFontSize: `${text.fontSize}px`,
+    bvFont: text.fontFamily,
+  };
 }
 
 export function persistAnnotation(a: any) {
@@ -141,12 +160,12 @@ export function persistAnnotation(a: any) {
   if (key) persistStudyAnnotations(keyToInstance.get(key)!.studyUID);
 }
 
-export function installAnnotationPersistence(defaults: () => { color: string; lineWidth: number; angleMode: string; visible: boolean }) {
+export function installAnnotationPersistence(defaults: () => { color: string; lineWidth: number; angleMode: string; visible: boolean; text: TextStyle }) {
   eventTarget.addEventListener(ToolEnums.Events.ANNOTATION_COMPLETED, (evt: any) => {
     const a = evt.detail?.annotation;
     if (!a || a.data?.bvStyle) return;
     const d = defaults();
-    a.data.bvStyle = styleFor(d.color, d.lineWidth);
+    a.data.bvStyle = styleFor(d.color, d.lineWidth, d.text);
     if (a.metadata?.toolName === 'CobbAngle') a.data.bvAngleMode = d.angleMode;
     annotation.config.style.setAnnotationStyles(a.annotationUID, a.data.bvStyle);
   });
@@ -198,4 +217,35 @@ export async function ensureThumbnail(series: SeriesRec): Promise<Blob | null> {
   if (!wasOpen) releaseSeries(series.seriesUID);
   if (blob && (await d.getKey('series', series.seriesUID))) await putThumb(series.seriesUID, blob);
   return blob;
+}
+
+/** "Alle Annotationen löschen": measurements of one series or of all studies (masks stay). */
+export async function deleteAllAnnotations(scope: 'series' | 'all', seriesUID?: string | null) {
+  const all = annotation.state.getAllAnnotations() as any[];
+  if (scope === 'all') {
+    for (const a of all) annotation.state.removeAnnotation(a.annotationUID);
+    await clearAllStoredAnnotations();
+    return;
+  }
+  const studies = new Set<string>();
+  for (const a of all) {
+    const key = imageIdToKey.get(a.metadata?.referencedImageId);
+    const inst = key ? keyToInstance.get(key) : undefined;
+    if (inst && inst.seriesUID === seriesUID) {
+      annotation.state.removeAnnotation(a.annotationUID);
+      studies.add(inst.studyUID);
+    }
+  }
+  // stored measurements of this series that were not loaded into memory
+  for (const st of studies) persistStudyAnnotations(st);
+  const imgs = seriesUID ? seriesImages.get(seriesUID) : undefined;
+  const sid = imgs?.[0]?.instance.studyUID;
+  if (sid) {
+    const w = workOf(sid);
+    if (w) {
+      const keys = new Set(imgs!.map((i) => i.instanceKey));
+      w.annotations = w.annotations.filter((x) => !keys.has(x.instanceKey));
+      saveWorkSoon(sid);
+    }
+  }
 }

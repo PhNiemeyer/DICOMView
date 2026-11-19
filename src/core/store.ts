@@ -14,6 +14,20 @@ export interface Toast {
   kind: 'info' | 'warn' | 'error';
 }
 
+export interface OverlayState {
+  /** Mode switched on by the user */
+  active: boolean;
+  /** pick1: choose base image (left) · pick2: choose 2nd image (left) · ready: overlay shown right · final: single-field mode */
+  stage: 'pick1' | 'pick2' | 'ready' | 'final';
+  /** Viewport showing the overlay */
+  vpIndex: number;
+  base?: { imageId: string; seriesUID: string; index: number };
+  top?: { imageId: string; canvas: HTMLCanvasElement };
+  alpha: number;
+}
+
+export const OVERLAY_OFF: OverlayState = { active: false, stage: 'pick1', vpIndex: 1, alpha: 0.5 };
+
 export interface CropRect {
   viewportIndex: number;
   // canvas CSS coordinates within the viewport element
@@ -32,6 +46,11 @@ interface State {
   selectedStudy: string | null;
   layout: Layout;
   viewportSeries: (string | null)[];
+  /** slice index to open when a series is loaded into a viewport (consumed once) */
+  viewportStartIndex: (number | null)[];
+  overlay: OverlayState;
+  overlayExportOpen: boolean;
+  deleteAllOpen: boolean;
   activeViewport: number;
   tool: ToolId;
   measurementsVisible: boolean;
@@ -54,7 +73,7 @@ interface State {
   refreshTree: () => Promise<void>;
   set: (p: Partial<State>) => void;
   toast: (text: string, kind?: Toast['kind']) => void;
-  setViewportSeries: (index: number, seriesUID: string | null) => void;
+  setViewportSeries: (index: number, seriesUID: string | null, startIndex?: number) => void;
 }
 
 let toastId = 0;
@@ -71,6 +90,10 @@ export const useStore = create<State>((set, get) => {
     selectedStudy: null,
     layout: 1,
     viewportSeries: [null, null, null, null],
+    viewportStartIndex: [null, null, null, null],
+    overlay: OVERLAY_OFF,
+    overlayExportOpen: false,
+    deleteAllOpen: false,
     activeViewport: 0,
     tool: 'scroll',
     measurementsVisible: true,
@@ -115,10 +138,12 @@ export const useStore = create<State>((set, get) => {
       set({ toasts: [...get().toasts, { id, text, kind }] });
       setTimeout(() => set({ toasts: get().toasts.filter((t) => t.id !== id) }), kind === 'info' ? 5000 : 10000);
     },
-    setViewportSeries: (index, seriesUID) => {
+    setViewportSeries: (index, seriesUID, startIndex) => {
       const v = [...get().viewportSeries];
+      const si = [...get().viewportStartIndex];
       v[index] = seriesUID;
-      set({ viewportSeries: v });
+      si[index] = startIndex ?? null;
+      set({ viewportSeries: v, viewportStartIndex: si });
     },
   };
 });

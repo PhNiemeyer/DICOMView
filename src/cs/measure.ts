@@ -4,6 +4,9 @@ import { fmtNum, t } from '../core/i18n';
 import { calibrationForImageId } from './registry';
 import { angle3, angleBetweenLines, circleDiameter, length, type P2, type Scale } from './geometry';
 
+/** Global display switches (set from the settings store). */
+export const measureDisplay = { showValues: true };
+
 export function imageIdFromTarget(targetId: string): string | null {
   return targetId?.startsWith('imageId:') ? targetId.slice('imageId:'.length) : null;
 }
@@ -42,12 +45,14 @@ function lenText(v: number, cal: ReturnType<typeof calibrationForImageId>) {
 }
 
 export function lengthText(data: any, targetId: string) {
+  if (!measureDisplay.showValues) return [];
   const c = ctx(data, targetId);
   if (!c || c.pts.length < 2) return [];
   return [lenText(length(c.pts[0], c.pts[1], c.scale), c.cal)];
 }
 
 export function angleText(data: any, targetId: string) {
+  if (!measureDisplay.showValues) return [];
   const c = ctx(data, targetId);
   if (!c || c.pts.length < 3) return [];
   const a = angle3(c.pts[0], c.pts[1], c.pts[2], c.aspectScale);
@@ -57,6 +62,7 @@ export function angleText(data: any, targetId: string) {
 export type AngleMode = 'acute' | 'obtuse' | 'both';
 
 export function cobbText(data: any, targetId: string) {
+  if (!measureDisplay.showValues) return [];
   const c = ctx(data, targetId);
   if (!c || c.pts.length < 4) return [];
   const { inner, supplementary } = angleBetweenLines(c.pts[0], c.pts[1], c.pts[2], c.pts[3], c.aspectScale);
@@ -68,6 +74,7 @@ export function cobbText(data: any, targetId: string) {
 }
 
 export function circleText(data: any, targetId: string | string[]) {
+  if (!measureDisplay.showValues) return [];
   const c = ctx(data, targetId);
   if (!c || c.pts.length < 2) return [];
   return [`Ø ${lenText(circleDiameter(c.pts[0], c.pts[1], c.scale), c.cal)}`];
@@ -82,4 +89,21 @@ export function annotationPixelVector(ann: any): { dx: number; dy: number; image
   const b = toImage(imageId, pts[1]);
   if (!a || !b) return null;
   return { dx: b[0] - a[0], dy: b[1] - a[1], imageId };
+}
+
+/** Text lines of an annotation as measured on its own (source) image. */
+export function textForAnnotation(ann: any): string[] {
+  const target = 'imageId:' + ann?.metadata?.referencedImageId;
+  switch (ann?.metadata?.toolName) {
+    case 'Length':
+      return lengthText(ann.data, target);
+    case 'Angle':
+      return angleText(ann.data, target);
+    case 'CobbAngle':
+      return cobbText(ann.data, target);
+    case 'CircleROI':
+      return circleText(ann.data, target);
+    default:
+      return [];
+  }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Enums, eventTarget, type Types } from '@cornerstonejs/core';
-import { ToolGroupManager } from '@cornerstonejs/tools';
+import { ToolGroupManager, Enums as ToolEnums } from '@cornerstonejs/tools';
 import { getEngine, MAIN_TOOLGROUP } from '../cs/init';
 import { useStore } from '../core/store';
 import { fmtDicomDate, fmtNum, t } from '../core/i18n';
@@ -10,6 +10,10 @@ import { effectiveCalibration, getVersion, imageIdToKey, keyToInstance, masksFor
 import { fillMasks, maskPolygon, pointInPoly } from '../cs/masks';
 import { touchStudy } from '../core/db';
 import type { Mask } from '../core/types';
+import { drawGhosts } from '../cs/ghosts';
+import { drawOverlayImage } from '../cs/overlay';
+import { adoptOverlay, pickFromLeft, setOverlayAlpha } from '../core/overlayActions';
+import { Layers2, Check } from 'lucide-react';
 
 interface Info {
   error?: boolean;
@@ -24,6 +28,12 @@ interface Info {
 export default function Viewport({ index }: { index: number }) {
   const elRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
+  const underlayRef = useRef<HTMLCanvasElement | null>(null);
+  const overlay = useStore((s) => s.overlay);
+  const persist = useStore((s) => s.settings.persistAcrossSlices);
+  const showValues = useStore((s) => s.settings.showValues);
+  const measurementsVisible = useStore((s) => s.measurementsVisible);
+  const [picking, setPicking] = useState(false);
   const seriesUID = useStore((s) => s.viewportSeries[index]);
   const active = useStore((s) => s.activeViewport === index);
   const layout = useStore((s) => s.layout);
@@ -45,6 +55,14 @@ export default function Viewport({ index }: { index: number }) {
     const engine = getEngine();
     engine.enableElement({ viewportId: vpId(index), element: el, type: Enums.ViewportType.STACK, defaultOptions: { background: [0, 0, 0] } } as any);
     ToolGroupManager.getToolGroup(MAIN_TOOLGROUP)?.addViewport(vpId(index), engine.id);
+    // canvas for the overlay image: above the image, below the measurement layer (SVG)
+    const csCanvas = el.querySelector('canvas.cornerstone-canvas');
+    if (csCanvas && !underlayRef.current) {
+      const u = document.createElement('canvas');
+      u.className = 'vp-underlay';
+      csCanvas.insertAdjacentElement('afterend', u);
+      underlayRef.current = u;
+    }
     setReady(true);
     const ro = new ResizeObserver(() => {
       engine.resize(true, true);
@@ -53,6 +71,8 @@ export default function Viewport({ index }: { index: number }) {
     ro.observe(el);
     return () => {
       ro.disconnect();
+      underlayRef.current?.remove();
+      underlayRef.current = null;
       ToolGroupManager.getToolGroup(MAIN_TOOLGROUP)?.removeViewports(engine.id, vpId(index));
       engine.disableElement(vpId(index));
     };
@@ -77,14 +97,21 @@ export default function Viewport({ index }: { index: number }) {
       const ids = imageIdsOf(imgs);
       await touchStudy(seriesRec.studyUID);
       let error = false;
+      const req = useStore.getState().viewportStartIndex[index];
+      const start = req != null ? Math.max(0, Math.min(ids.length - 1, req)) : 0;
+      if (req != null) {
+        const si = [...useStore.getState().viewportStartIndex];
+        si[index] = null;
+        useStore.getState().set({ viewportStartIndex: si });
+      }
       try {
-        await vp.setStack(ids, 0);
+        await vp.setStack(ids, start);
         vp.render();
       } catch {
         error = true; // shown in the viewport instead of failing silently
       }
       if (cancelled) return;
-      setInfo({ index: 0, total: ids.length, loading: false, error, ...readVoi(vp) });
+      setInfo({ index: start, total: ids.length, loading: false, error, ...readVoi(vp) });
     })();
     const uid = seriesRec.seriesUID;
     return () => {
@@ -118,12 +145,16 @@ export default function Viewport({ index }: { index: number }) {
       drawOverlay();
       onVoi();
     };
+    const annEvents = [ToolEnums.Events.ANNOTATION_COMPLETED, ToolEnums.Events.ANNOTATION_MODIFIED, ToolEnums.Events.ANNOTATION_REMOVED, ToolEnums.Events.ANNOTATION_VISIBILITY_CHANGE];
+    const onAnn = () => drawOverlay();
+    annEvents.forEach((e) => e && eventTarget.addEventListener(e, onAnn));
     el.addEventListener(Enums.Events.STACK_NEW_IMAGE, onNew);
     el.addEventListener(Enums.Events.VOI_MODIFIED, onVoi);
     el.addEventListener(Enums.Events.IMAGE_RENDERED, onRender);
     el.addEventListener(Enums.Events.CAMERA_MODIFIED, onRender);
     return () => {
       eventTarget.removeEventListener(Enums.Events.IMAGE_LOAD_FAILED, onFail);
+      annEvents.forEach((e) => e && eventTarget.removeEventListener(e, onAnn));
       el.removeEventListener(Enums.Events.STACK_NEW_IMAGE, onNew);
       el.removeEventListener(Enums.Events.VOI_MODIFIED, onVoi);
       el.removeEventListener(Enums.Events.IMAGE_RENDERED, onRender);
@@ -131,7 +162,24 @@ export default function Viewport({ index }: { index: number }) {
     };
   });
 
-  useEffect(() => drawOverlay(), [regVersion, selectedMaskId, crop, tool, layout]);
+  useEffect(() => drawOverlay(), [regVersion, selectedMaskId, crop, tool, layout, overlay, persist, showValues, measurementsVisible]);
+
+  // after switching the layout (1/2/4 fields) fit the image to the new field size
+  const firstLayout = useRef(true);
+  useEffect(() => {
+    if (firstLayout.current) {
+      firstLayout.current = false;
+      return;
+    }
+    const id = requestAnimationFrame(() => {
+      const vp = getViewport(index);
+      if (!vp || !vp.getImageIds().length) return;
+      getEngine().resize(true, true);
+      vp.setViewPresentation({ zoom: 1, pan: [0, 0] });
+      vp.render();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [layout]);
 
   function readVoi(vp: Types.IStackViewport) {
     const w = getWindow(vp);
@@ -159,14 +207,31 @@ export default function Viewport({ index }: { index: number }) {
     const g = c.getContext('2d')!;
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.clearRect(0, 0, c.width, c.height);
+    const u = underlayRef.current;
+    let ug: CanvasRenderingContext2D | null = null;
+    if (u) {
+      if (u.width !== c.width || u.height !== c.height) {
+        u.width = c.width;
+        u.height = c.height;
+      }
+      ug = u.getContext('2d')!;
+      ug.setTransform(1, 0, 0, 1, 0, 0);
+      ug.clearRect(0, 0, u.width, u.height);
+    }
     const vp = getViewport(index);
     const imageId = currentImageId(vp);
     if (!vp || !imageId) return;
     const key = imageIdToKey.get(imageId);
     if (!key) return;
+    const st = useStore.getState();
+    // semi-transparent overlay image (below the measurements)
+    const o = st.overlay;
+    if (ug && o.active && o.vpIndex === index && o.top && o.base?.imageId === imageId && (o.stage === 'ready' || o.stage === 'final'))
+      drawOverlayImage(ug, vp, imageId, o.top, o.alpha, dpr);
     const masks = masksFor(key);
     fillMasks(g, vp, imageId, masks, dpr);
-    const st = useStore.getState();
+    // measurements of other images of this series (display only)
+    if (st.settings.persistAcrossSlices && st.measurementsVisible) drawGhosts(g, vp, imageId, dpr);
     if (st.tool === 'mask') {
       for (const m of masks) {
         const poly = maskPolygon(vp, imageId, m);
@@ -399,6 +464,38 @@ export default function Viewport({ index }: { index: number }) {
         </>
       )}
       {layout > 1 && <div className="vp-number">{index + 1}</div>}
+      {overlay.active && index === 0 && overlay.stage !== 'final' && seriesRec && (
+        <div className="ovl-bar">
+          <button
+            className="btn primary ovl-btn"
+            disabled={picking}
+            onClick={async () => {
+              setPicking(true);
+              try {
+                await pickFromLeft();
+              } finally {
+                setPicking(false);
+              }
+            }}
+          >
+            <Layers2 size={16} strokeWidth={1.5} /> {overlay.stage === 'pick1' ? t('ovlPickBase') : t('ovlPickTop')}
+          </button>
+          <span className="ovl-hint">{overlay.stage === 'pick1' ? t('ovlHintBase') : t('ovlHintTop')}</span>
+        </div>
+      )}
+      {overlay.active && index === overlay.vpIndex && (overlay.stage === 'ready' || overlay.stage === 'final') && (
+        <div className="ovl-bar right">
+          {overlay.stage === 'ready' && (
+            <button className="btn primary ovl-btn" onClick={adoptOverlay}>
+              <Check size={16} strokeWidth={1.5} /> {t('ovlAdopt')}
+            </button>
+          )}
+          <label className="ovl-alpha">
+            <span>{t('ovlOpacity')} {Math.round(overlay.alpha * 100)} %</span>
+            <input type="range" min={0} max={1} step={0.05} value={overlay.alpha} onChange={(e) => setOverlayAlpha(parseFloat(e.target.value))} />
+          </label>
+        </div>
+      )}
     </div>
   );
 }

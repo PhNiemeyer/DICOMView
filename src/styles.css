@@ -227,3 +227,18 @@ legend { font-size: 12px; color: var(--text2); padding: 0 4px; }
   .top-btn:not(.lang) { font-size: 0; gap: 0; padding: 0 10px; }
   .purge-chip { max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
 }
+
+/* measurements section */
+.psec h4 { font-size: 12px; font-weight: 650; margin: 12px 0 6px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+.del-all { margin: 6px 0 4px; }
+.text-style { margin-top: 4px; }
+
+/* overlay mode */
+.vp-underlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.ovl-bar { position: absolute; left: 50%; bottom: 58px; transform: translateX(-50%); z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: calc(100% - 24px); }
+.ovl-btn { box-shadow: 0 0 0 1px rgba(255,255,255,0.25); white-space: normal; text-align: left; height: auto; min-height: 36px; padding: 6px 14px; }
+.ovl-hint { color: #e8eef0; font-size: 12px; text-shadow: 0 0 2px #000; text-align: center; }
+.ovl-alpha { display: flex; align-items: center; gap: 8px; color: #e8eef0; font-size: 12px; background: rgba(8,43,67,0.8); padding: 4px 10px; border-radius: var(--r); }
+.ovl-alpha input { accent-color: var(--turquoise); width: 120px; }
+.tb-btn.ovl-export.highlight { background: var(--coral); color: #fff; }
+.tb-btn.ovl-export.highlight:hover { background: #e85a3a; }

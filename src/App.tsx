@@ -9,7 +9,7 @@ import RightPanel from './components/RightPanel';
 import ExportDialog from './components/ExportDialog';
 import VideoPanel from './components/VideoPanel';
 import MprView from './components/MprView';
-import { AssignDialog, ImportPanel, SettingsDialog } from './components/Dialogs';
+import { AssignDialog, DeleteAllDialog, ImportPanel, OverlayExportDialog, SettingsDialog } from './components/Dialogs';
 import { ImportJob, filesFromDataTransfer, filesFromInput, type ImportFileItem, type ImportProgress, type PendingImage } from './import/importer';
 import { deleteSelectedAnnotations, fit, flip, invert, resetView, rotate, scrollBy, scrollTo, activeViewport, currentImageId } from './cs/viewportOps';
 import { imageIdToKey, keyToInstance, updateMasks } from './cs/registry';
@@ -23,6 +23,8 @@ export default function App() {
   const dialog = useStore((s) => s.dialog);
   const mprSeries = useStore((s) => s.mprSeries);
   const toasts = useStore((s) => s.toasts);
+  const deleteAllOpen = useStore((s) => s.deleteAllOpen);
+  const overlayExportOpen = useStore((s) => s.overlayExportOpen);
   const hasData = useStore((s) => s.studies.length > 0);
   useStore((s) => s.settings.lang);
   const [dragging, setDragging] = useState(false);
@@ -195,6 +197,8 @@ export default function App() {
       {dialog === 'export' && <ExportDialog />}
       {dialog === 'video' && <VideoPanel />}
       {dialog === 'settings' && <SettingsDialog />}
+      {deleteAllOpen && <DeleteAllDialog />}
+      {overlayExportOpen && <OverlayExportDialog />}
       <div className="toasts" aria-live="polite">
         {toasts.map((x) => (
           <div key={x.id} className={`toast ${x.kind}`}>{x.text}</div>

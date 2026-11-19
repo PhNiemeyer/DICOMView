@@ -19,7 +19,10 @@ import {
   Undo2,
   ZoomIn,
   SunMoon,
+  Layers2,
+  ImageDown,
 } from 'lucide-react';
+import { setOverlayMode } from '../core/overlayActions';
 import type { ReactNode } from 'react';
 import { useStore } from '../core/store';
 import { t, type DictKey } from '../core/i18n';
@@ -49,6 +52,7 @@ export function selectTool(id: ToolId) {
 export default function Toolbar() {
   const tool = useStore((s) => s.tool);
   const visible = useStore((s) => s.measurementsVisible);
+  const overlay = useStore((s) => s.overlay);
   useStore((s) => s.settings.lang);
 
   return (
@@ -117,6 +121,27 @@ export default function Toolbar() {
         <button className={`tb-btn ${tool === 'crop' ? 'active' : ''}`} aria-pressed={tool === 'crop'} title={t('cropHint')} onClick={() => selectTool('crop')}>
           <Crop {...ICON} />
           <span>{t('tCrop')}</span>
+        </button>
+      </div>
+      <div className="tb-sep" />
+      <div className="tb-group">
+        <button
+          className={`tb-btn ${overlay.active ? 'active' : ''}`}
+          aria-pressed={overlay.active}
+          title={t('ovlModeHint')}
+          onClick={() => setOverlayMode(!overlay.active)}
+        >
+          <Layers2 {...ICON} />
+          <span>{t('ovlMode')}</span>
+        </button>
+        <button
+          className={`tb-btn ovl-export ${overlay.stage === 'final' && overlay.active ? 'highlight' : ''}`}
+          disabled={!(overlay.active && overlay.stage === 'final')}
+          title={t('ovlExport')}
+          onClick={() => useStore.getState().set({ overlayExportOpen: true })}
+        >
+          <ImageDown {...ICON} />
+          <span>{t('ovlExportShort')}</span>
         </button>
       </div>
     </div>
