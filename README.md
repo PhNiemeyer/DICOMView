@@ -30,6 +30,8 @@ Bei jedem Push auf `main` baut `.github/workflows/pages.yml` die App und veröff
 
 ### Eigener Server (Docker, z. B. Hostinger VPS)
 
+Live unter **https://dicomview.duckdns.org** (Hostinger-VPS hinter dem gemeinsamen Edge-Proxy; jede Änderung auf `main` ist nach ca. 5 Minuten online).
+
 `deploy/docker-compose.yml` lädt das fertig gebaute Paket aus dem GitHub-Release `site-latest` (wird bei jedem Push auf `main` neu erzeugt) und liefert es mit Caddy aus – inklusive automatischem HTTPS-Zertifikat (Let's Encrypt). Ohne eigene Domain eignet sich die kostenlose Adresse `<IP mit Bindestrichen>.sslip.io` (z. B. `203-0-113-10.sslip.io`):
 
 ```bash

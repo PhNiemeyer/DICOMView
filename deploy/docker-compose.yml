@@ -1,35 +1,68 @@
-# Deploy on any Docker host (e.g. Hostinger VPS Docker Manager). No build on the server:
-# the "fetch" service downloads the prebuilt site package from the GitHub release "site-latest".
-# Set SITE_ADDRESS to "<ip-with-dashes>.sslip.io" or your own domain.
+# DICOMView on the Hostinger VPS, behind the shared edge proxy
+# (project "edge" holds ports 80/443, terminates HTTPS and routes dicomview.duckdns.org -> dicomview:80).
+# The updater pulls the prebuilt package from the GitHub release "site-latest" every 5 minutes,
+# so every push to main is live within ~5 minutes. Set on the VPS project: SITE_ADDRESS=:80
 services:
-  fetch:
+  updater:
     image: alpine:3.20
-    command: >
-      sh -c "rm -rf /app/* && wget -qO- https://github.com/PhNiemeyer/DICOMView/releases/download/site-latest/dicomview-site.tar.gz | tar -xz -C /app && ls /app"
+    restart: unless-stopped
+    environment:
+      PKG_URL: https://github.com/PhNiemeyer/DICOMView/releases/download/site-latest/dicomview-site.tar.gz
+      INTERVAL: "300"
     volumes:
       - app:/app
-    restart: "no"
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          if wget -qO /tmp/pkg.tgz "$$PKG_URL"; then
+            NEW=$$(sha256sum /tmp/pkg.tgz | cut -d' ' -f1)
+            if [ "$$NEW" != "$$(cat /app/.version 2>/dev/null)" ]; then
+              rm -rf /app/.new && mkdir -p /app/.new
+              if tar -xzf /tmp/pkg.tgz -C /app/.new && [ -f /app/.new/site/index.html ]; then
+                cp /app/.new/Caddyfile /app/Caddyfile.tmp && mv /app/Caddyfile.tmp /app/Caddyfile
+                rm -rf /app/.old
+                [ -d /app/site ] && mv /app/site /app/.old
+                mv /app/.new/site /app/site
+                echo "$$NEW" > /app/.version
+                echo "$$(date -u) updated to $$NEW"
+              else
+                echo "$$(date -u) package invalid, keeping current version"
+              fi
+            fi
+          else
+            echo "$$(date -u) download failed, retrying later"
+          fi
+          sleep "$$INTERVAL"
+        done
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/site/index.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
 
   web:
     image: caddy:2-alpine
     depends_on:
-      fetch:
-        condition: service_completed_successfully
-    command: caddy run --config /app/Caddyfile --adapter caddyfile
+      updater:
+        condition: service_healthy
+    command: caddy run --config /app/Caddyfile --adapter caddyfile --watch
     environment:
-      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
       SITE_ROOT: /app/site
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
     volumes:
       - app:/app:ro
-      - caddy_data:/data
-      - caddy_config:/config
     restart: unless-stopped
+    networks:
+      web:
+        aliases: [dicomview]
+      default: {}
+
+networks:
+  web:
+    name: web
 
 volumes:
   app:
-  caddy_data:
-  caddy_config:
