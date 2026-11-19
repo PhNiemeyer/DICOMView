@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<title>DICOMView – Benutzerhandbuch V 2.0</title>
+<style>
+  @font-face { font-family: 'Geist'; src: url('fonts/geist-latin-wght-normal.woff2') format('woff2'); font-weight: 100 900; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'Geist'; src: url('fonts/geist-latin-ext-wght-normal.woff2') format('woff2'); font-weight: 100 900; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  :root {
+    --pn-navy: #082B43; --pn-petrol: #103E5C; --pn-turquoise: #57C8CE; --pn-teal: #168B92;
+    --pn-mist: #F4F8F8; --pn-line: #D5E3E5; --pn-text: #4D6D7B; --pn-ref: #607D89;
+    --pn-coral: #FF6B4A; --pn-white: #FFFFFF;
+  }
+  @page { size: A4; margin: 20mm 18mm 22mm 18mm; }
+  @page cover { margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Geist', 'DM Sans', Arial, sans-serif; color: var(--pn-text); font-size: 10.3pt; line-height: 1.5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  strong, b { color: var(--pn-navy); font-weight: 650; }
+
+  /* ---------- cover ---------- */
+  .cover { page: cover; width: 210mm; height: 297mm; display: flex; break-after: page; }
+  .cover .left { width: 60%; background: var(--pn-navy); color: #fff; padding: 34mm 14mm 22mm 18mm; display: flex; flex-direction: column; }
+  .cover .right { width: 40%; background: var(--pn-petrol); position: relative; }
+  .cover .eyebrow { color: var(--pn-turquoise); font-size: 9pt; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; }
+  .cover .bar { width: 52mm; height: 3.2mm; background: var(--pn-turquoise); margin: 9mm 0 20mm; }
+  .cover h1 { font-size: 44pt; font-weight: 800; line-height: 1.02; margin: 0; letter-spacing: -0.01em; color: #fff; }
+  .cover .sub { font-size: 15pt; color: #D9EEF0; margin-top: 7mm; font-weight: 400; }
+  .cover .ver { font-size: 11pt; color: #fff; margin-top: 4mm; }
+  .cover .spacer { flex: 1; }
+  .cover .claim { font-size: 13pt; font-weight: 650; line-height: 1.35; color: #fff; }
+  .cover .mark { font-size: 9pt; color: #BFD3DA; margin-top: 8mm; }
+  .cover .note { font-size: 8pt; color: #9FB8C2; margin-top: 2mm; }
+  .cover .dot { position: absolute; width: 13mm; height: 13mm; border-radius: 50%; background: var(--pn-coral); right: 26mm; bottom: 46mm; }
+
+  /* ---------- toc ---------- */
+  .toc { break-after: page; }
+  .toc ol { list-style: none; padding: 0; margin: 8mm 0 0; counter-reset: c; }
+  .toc li { display: flex; align-items: baseline; gap: 6mm; padding: 3.2mm 0; border-bottom: 0.3mm solid var(--pn-line); font-size: 12pt; color: var(--pn-navy); }
+  .toc li .n { color: var(--pn-turquoise); font-weight: 650; font-size: 10pt; width: 9mm; }
+  .toc li .t { flex: 1; }
+  .toc li.new .t::after { content: 'NEU'; margin-left: 3mm; font-size: 7.5pt; font-weight: 650; letter-spacing: 0.06em; color: var(--pn-teal); border: 0.3mm solid var(--pn-teal); border-radius: 1mm; padding: 0.3mm 1.5mm; vertical-align: 1px; }
+
+  /* ---------- chapters ---------- */
+  .chapter { break-before: page; }
+  .chapter.cont { break-before: auto; margin-top: 12mm; }
+  .eb { color: var(--pn-turquoise); font-size: 8.5pt; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 2mm; }
+  h1.h { font-size: 24pt; font-weight: 750; color: var(--pn-navy); line-height: 1.12; margin: 0 0 4mm; letter-spacing: -0.005em; }
+  .lead { font-size: 12pt; line-height: 1.45; color: var(--pn-text); margin: 0 0 6mm; }
+  h2 { font-size: 15pt; font-weight: 650; color: var(--pn-navy); margin: 8mm 0 2.5mm; break-after: avoid; }
+  h3 { font-size: 11pt; font-weight: 650; color: var(--pn-navy); margin: 5mm 0 1.5mm; break-after: avoid; }
+  p { margin: 0 0 2.6mm; }
+  hr.rule { border: 0; border-top: 0.3mm solid var(--pn-line); margin: 6mm 0; }
+
+  ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 2mm 0 4mm; }
+  ol.steps > li { counter-increment: s; position: relative; padding-left: 9mm; margin-bottom: 2mm; break-inside: avoid; }
+  ol.steps > li::before { content: counter(s); position: absolute; left: 0; top: 0.2mm; width: 5.6mm; height: 5.6mm; border-radius: 1mm; background: var(--pn-teal); color: #fff; font-size: 8.5pt; font-weight: 650; display: flex; align-items: center; justify-content: center; }
+  ul { margin: 1mm 0 3mm; padding-left: 5mm; }
+  ul li { margin-bottom: 1.2mm; }
+  ul li::marker { color: var(--pn-turquoise); }
+
+  .card { background: var(--pn-mist); border: 0.3mm solid var(--pn-line); border-left: 1mm solid var(--pn-teal); border-radius: 2mm; padding: 3.5mm 4.5mm; margin: 3mm 0 5mm; break-inside: avoid; }
+  .card .ct { font-weight: 650; color: var(--pn-navy); margin-bottom: 1.2mm; }
+  .card ul { margin: 0; }
+  .card.warn { border-left-color: var(--pn-navy); }
+
+  .step-h { display: flex; align-items: baseline; gap: 3mm; margin: 6mm 0 1.5mm; break-after: avoid; }
+  .step-h .k { font-size: 8.5pt; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pn-turquoise); white-space: nowrap; }
+  .step-h .tt { font-size: 11pt; font-weight: 650; color: var(--pn-navy); }
+
+  table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; font-size: 9.3pt; break-inside: auto; }
+  th { background: var(--pn-mist); color: var(--pn-navy); text-align: left; font-weight: 650; padding: 2.2mm 2.6mm; border-bottom: 0.4mm solid var(--pn-line); }
+  td { padding: 2mm 2.6mm; border-bottom: 0.3mm solid var(--pn-line); vertical-align: top; }
+  tr { break-inside: avoid; }
+  td.k { color: var(--pn-navy); font-weight: 650; white-space: nowrap; }
+  kbd { font-family: inherit; font-size: 8.5pt; color: var(--pn-navy); border: 0.3mm solid var(--pn-line); border-bottom-width: 0.6mm; border-radius: 1mm; padding: 0 1.4mm; background: #fff; }
+  .ui { color: var(--pn-navy); font-weight: 650; }
+
+  figure { margin: 4mm 0 6mm; break-inside: avoid; }
+  figure img { width: 100%; max-width: 112mm; display: block; border: 0.3mm solid var(--pn-line); border-radius: 1.5mm; }
+  figcaption { font-size: 8pt; color: var(--pn-ref); margin-top: 1.6mm; }
+
+  .new-banner { display: flex; gap: 6mm; align-items: stretch; margin: 2mm 0 6mm; }
+  .new-banner .v { background: var(--pn-navy); color: #fff; border-radius: 2mm; padding: 5mm 6mm; min-width: 38mm; }
+  .new-banner .v .big { font-size: 30pt; font-weight: 800; line-height: 1; color: var(--pn-turquoise); }
+  .new-banner .v .sm { font-size: 8.5pt; color: #D9EEF0; margin-top: 2mm; }
+  .new-banner .txt { flex: 1; }
+
+  .faq h3 { margin-top: 4mm; }
+  .back { break-before: page; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="cover">
+  <div class="left">
+    <div class="eyebrow">Benutzerhandbuch</div>
+    <div class="bar"></div>
+    <h1>DICOMView</h1>
+    <div class="sub">DICOM- und Bildviewer für Vorträge und Publikationen</div>
+    <div class="ver">Version 2.0 · November 2026</div>
+    <div class="spacer"></div>
+    <div class="claim">Medizinische Präzision.<br />Menschlich erklärt.</div>
+    <div class="mark">Prof. Dr. med. Philipp Niemeyer</div>
+    <div class="note">Nicht für die diagnostische Befundung bestimmt.</div>
+  </div>
+  <div class="right"><div class="dot"></div></div>
+</section>
+
+<!-- ============ TOC ============ -->
+<section class="toc">
+  <div class="eb">Inhalt</div>
+  <h1 class="h">Was Sie in diesem Handbuch finden</h1>
+  <p class="lead">Kapitel 02 beschreibt alle Neuerungen der Version 2.0 mit Schritt-für-Schritt-Anleitungen. Die übrigen Kapitel erklären die gesamte Bedienung.</p>
+  <ol>
+    <li><span class="n">01</span><span class="t">Überblick und Datenschutz</span></li>
+    <li class="new"><span class="n">02</span><span class="t">Neuerungen in Version 2.0</span></li>
+    <li><span class="n">03</span><span class="t">Erste Schritte und Aufbau der Oberfläche</span></li>
+    <li><span class="n">04</span><span class="t">Bilder importieren</span></li>
+    <li><span class="n">05</span><span class="t">Patienten, Untersuchungen und Serien</span></li>
+    <li><span class="n">06</span><span class="t">Bilder betrachten</span></li>
+    <li><span class="n">07</span><span class="t">Messen und Kalibrieren</span></li>
+    <li><span class="n">08</span><span class="t">Patientendaten maskieren</span></li>
+    <li><span class="n">09</span><span class="t">Exportieren: Screenshot und Video</span></li>
+    <li><span class="n">10</span><span class="t">MPR – multiplanare Rekonstruktion</span></li>
+    <li><span class="n">11</span><span class="t">Speicher, tägliche Löschung und Einstellungen</span></li>
+    <li><span class="n">12</span><span class="t">Tastenkürzel</span></li>
+    <li><span class="n">13</span><span class="t">Grenzen und häufige Fragen</span></li>
+  </ol>
+</section>
+
+<!-- ============ 01 ============ -->
+<section class="chapter" style="break-before:auto">
+  <div class="eb">01 · Überblick</div>
+  <h1 class="h">Ein Viewer, der Ihre Daten auf dem Gerät lässt</h1>
+  <p class="lead">DICOMView zeigt DICOM-Bilder (CT, MRT, Röntgen) und Fotos (JPEG, PNG, BMP) für die Vorbereitung von Vorträgen und Publikationen. Die App ist nicht für die diagnostische Befundung bestimmt.</p>
+  <h3>Datenschutz</h3>
+  <p>Alle Bilder, Patientendaten, Messungen und Exporte werden ausschließlich lokal in Ihrem Browser verarbeitet. Es wird nichts auf einen Server hochgeladen, und es laufen keine Analyse-, KI- oder Texterkennungsdienste. Der lokale Arbeitsbestand wird standardmäßig jeden Tag um 23:59 Uhr automatisch gelöscht.</p>
+  <h3>Browser und Aufruf</h3>
+  <p>Empfohlen ist Google Chrome auf dem Mac; Safari ab Version 16.4 wird ebenfalls unterstützt. Windows und iPad sind für eine spätere Version vorgesehen. Öffnen Sie die Adresse der App im Browser, eine Installation ist nicht nötig. Die Oberfläche ist auf Deutsch und Englisch verfügbar; die Sprache wechseln Sie oben rechts mit <span class="ui">EN</span> bzw. <span class="ui">DE</span>.</p>
+</section>
+
+<!-- ============ 02 NEU ============ -->
+<section class="chapter">
+  <div class="eb">02 · Neu in Version 2.0</div>
+  <h1 class="h">Neuerungen in Version 2.0</h1>
+  <div class="new-banner">
+    <div class="v"><div class="big">2.0</div><div class="sm">fünf neue Funktionen<br />plus neues Erscheinungsbild</div></div>
+    <div class="txt">
+      <p class="lead" style="margin-bottom:2mm">Mitgeführte Messungen, gestaltbare Beschriftung, schnelles Zurücksetzen und das semitransparente Überlagern zweier Bilder.</p>
+      <p>Die Messungs-Optionen finden Sie im rechten Eigenschaften-Bereich im Abschnitt <span class="ui">„Messungen“</span>, das Überlagern über den Knopf <span class="ui">„Überlagern“</span> in der Werkzeugleiste.</p>
+    </div>
+  </div>
+  <table>
+    <tr><th>Neuerung</th><th>Wo</th><th>Wozu</th></tr>
+    <tr><td class="k">Messung über Einzelbild hinaus sichtbar</td><td>Messungen</td><td>Linien bleiben beim Blättern sichtbar</td></tr>
+    <tr><td class="k">Messwerte als Zahl anzeigen</td><td>Messungen</td><td>Zahl ein- oder ausblenden</td></tr>
+    <tr><td class="k">Schriftfarbe, -art, -größe</td><td>Messungen · Ausgewählte Messung</td><td>Beschriftung gestalten</td></tr>
+    <tr><td class="k">Alle Annotationen löschen</td><td>Messungen</td><td>Serie oder alles auf einmal zurücksetzen</td></tr>
+    <tr><td class="k">Bilder semitransparent überlagern</td><td>Werkzeugleiste</td><td>Zwei Ebenen übereinanderlegen, als JPEG exportieren</td></tr>
+    <tr><td class="k">Neues Erscheinungsbild</td><td>Kopfleiste · Startfläche</td><td>Name DICOMView, größere Kopfleiste</td></tr>
+  </table>
+
+  <h2>Messung über Einzelbild hinaus sichtbar machen</h2>
+  <p>Mit dieser Option bleibt eine Messung beim Blättern auf allen Bildern derselben Serie sichtbar. So setzen Sie zum Beispiel in einer MRT-Serie auf Bild 12 eine Linie, blättern auf Bild 18 und messen dort eine zweite Linie oder einen Winkel dazu, während die erste Linie sichtbar bleibt.</p>
+  <ol class="steps">
+    <li>Klicken Sie im rechten Bereich unter <span class="ui">Messungen</span> das Kästchen <span class="ui">„Messung über Einzelbild hinaus sichtbar machen“</span> an.</li>
+    <li>Setzen Sie auf einem Bild eine Messung, z. B. mit <span class="ui">Länge</span> (<kbd>L</kbd>).</li>
+    <li>Blättern Sie mit Mausrad, Pfeiltasten oder Schieberegler auf ein anderes Bild der Serie. Die Messung erscheint dort <b>gestrichelt</b>, mit dem Wert vom Ursprungsbild.</li>
+    <li>Messen Sie auf diesem Bild weiter, etwa mit <span class="ui">Winkel</span> oder <span class="ui">2-Linien-Winkel</span>.</li>
+  </ol>
+  <figure><img src="img/f1-persist.png" alt="" /><figcaption>Abb. 1 · Die Linie aus Bild 21 erscheint auf Bild 26 gestrichelt; darunter eine neue Messung auf Bild 26. Synthetische Testdaten.</figcaption></figure>
+  <div class="card"><div class="ct">Gut zu wissen</div>
+    <ul>
+      <li>Die Option gilt sofort für alle Messungen, auch für bereits vorhandene, und bleibt gespeichert, bis Sie sie abwählen.</li>
+      <li>Mitgeführt wird nur innerhalb derselben Serie, also derselben Schnittebene. In einer anderen Serie (z. B. koronar statt axial) erscheint die Linie nicht.</li>
+      <li>Gestrichelte Messungen dienen der Orientierung. Verschieben, bearbeiten oder löschen können Sie eine Messung nur auf ihrem Ursprungsbild (durchgezogene Linie).</li>
+      <li>Mitgeführte Messungen sind auch in Screenshot und Video enthalten, sofern Sie „Mit Messungen“ exportieren.</li>
+    </ul>
+  </div>
+
+  <h2>Messwerte als Zahl anzeigen</h2>
+  <p>Standardmäßig steht neben jeder Messung ihr Wert, z. B. „40,0 mm“ oder „30,0° (innen)“. Für Abbildungen, die nur die Linien zeigen sollen, blenden Sie die Zahlen aus.</p>
+  <ol class="steps">
+    <li>Entfernen Sie unter <span class="ui">Messungen</span> den Haken bei <span class="ui">„Messwerte als Zahl anzeigen“</span>.</li>
+    <li>Alle Messungen zeigen nun nur noch Linien, Winkelschenkel und Kreise. Das gilt auch für Screenshot und Video.</li>
+    <li>Setzen Sie den Haken wieder, um die Werte erneut anzuzeigen. Die Messungen selbst bleiben unverändert.</li>
+  </ol>
+
+  <h2>Schriftfarbe, Schriftart und Schriftgröße</h2>
+  <p>Die Beschriftung der Messwerte gestalten Sie jetzt unabhängig von der Linienfarbe.</p>
+  <h3>Für neue Messungen</h3>
+  <ol class="steps">
+    <li>Wählen Sie unter <span class="ui">Messungen → Darstellung neuer Messungen</span> bei <span class="ui">Schriftfarbe</span> eine der sieben Farben (Schwarz, Weiß, Rot, Gelb, Grün, Blau, Türkis).</li>
+    <li>Wählen Sie bei <span class="ui">Schriftart</span> zwischen Geist, DM Sans, Arial, Helvetica, Times New Roman und Courier New.</li>
+    <li>Wählen Sie bei <span class="ui">Schriftgröße</span> einen Wert zwischen 10 und 32 px.</li>
+    <li>Jede Messung, die Sie danach anlegen, übernimmt diese Einstellungen.</li>
+  </ol>
+  <h3>Für eine einzelne vorhandene Messung</h3>
+  <ol class="steps">
+    <li>Klicken Sie die Messung im Bild an, damit sie ausgewählt ist.</li>
+    <li>Ändern Sie unter <span class="ui">Ausgewählte Messung</span> Linienfarbe, Linienstärke, Schriftfarbe, Schriftart oder Schriftgröße. Die Änderung wirkt sofort.</li>
+  </ol>
+  <p style="font-size:9pt">Beim Export als Bild können Geist und DM Sans durch eine ähnliche Standardschrift ersetzt werden; Arial, Helvetica, Times und Courier erscheinen unverändert.</p>
+
+  <h2>Alle Annotationen löschen</h2>
+  <p>Mit einem Klick setzen Sie alle Messungen zurück, ohne jede einzeln löschen zu müssen.</p>
+  <ol class="steps">
+    <li>Klicken Sie unter <span class="ui">Messungen</span> auf <span class="ui">„Alle Annotationen löschen“</span>.</li>
+    <li>Wählen Sie den Umfang: <span class="ui">Nur diese Serie</span> löscht alle Messungen der Serie im aktiven Bildfeld; <span class="ui">Alle Untersuchungen</span> löscht sämtliche Messungen im Arbeitsbestand.</li>
+    <li>Mit <span class="ui">Abbrechen</span> bleibt alles unverändert.</li>
+  </ol>
+  <div class="card warn"><div class="ct">Wichtig</div>Das Löschen kann nicht rückgängig gemacht werden. <b>Masken zur Anonymisierung werden nicht gelöscht</b>, damit nicht versehentlich Patientendaten sichtbar werden. Eine einzelne Messung löschen Sie wie bisher durch Auswählen und <kbd>Entf</kbd>.</div>
+
+  <h2>Bilder semitransparent überlagern</h2>
+  <p>Der neue Modus legt zwei Bilder halbdurchsichtig übereinander – zum Beispiel zwei Schichten einer MRT-Serie, eine MRT- und eine CT-Ebene oder in seltenen Fällen zwei Röntgenbilder. Auf der Überlagerung messen Sie wie gewohnt und exportieren sie anschließend als JPEG.</p>
+
+  <div class="step-h"><span class="k">Schritt 1</span><span class="tt">Modus einschalten</span></div>
+  <ol class="steps">
+    <li>Klicken Sie in der Werkzeugleiste auf <span class="ui">„Überlagern“</span>. Der Knopf wird türkis.</li>
+    <li>Die Ansicht wechselt automatisch in zwei Bildfelder: links die Bildauswahl, rechts die Überlagerung.</li>
+  </ol>
+  <div class="step-h"><span class="k">Schritt 2</span><span class="tt">Erstes Bild wählen</span></div>
+  <ol class="steps">
+    <li>Laden Sie links die gewünschte Serie (Vorschaubild anklicken) und blättern Sie zum gewünschten Bild.</li>
+    <li>Klicken Sie unten im linken Bild auf <span class="ui">„Bild zur Überlagerung übernehmen“</span>.</li>
+    <li>Das Bild erscheint zusätzlich rechts. Der Knopf links ändert sich zu <span class="ui">„2. Ebene zur Überlagerung auswählen“</span>.</li>
+  </ol>
+  <div class="step-h"><span class="k">Schritt 3</span><span class="tt">Zweite Ebene wählen</span></div>
+  <ol class="steps">
+    <li>Blättern Sie links zur zweiten Ebene; dafür können Sie auch eine andere Serie oder Untersuchung laden.</li>
+    <li>Klicken Sie auf <span class="ui">„2. Ebene zur Überlagerung auswählen“</span>. Rechts wird sie mit <b>50 % Deckkraft</b> über das erste Bild gelegt.</li>
+    <li>Mit dem Regler <span class="ui">Deckkraft</span> im rechten Bild stellen Sie die Transparenz zwischen 0 und 100 % ein.</li>
+    <li>Passt die Ebene nicht, wählen Sie links eine andere und klicken erneut. Die Messwerkzeuge funktionieren rechts wie gewohnt.</li>
+  </ol>
+  <figure><img src="img/f2-overlay-ready.png" alt="" /><figcaption>Abb. 2 · Links Bildauswahl, rechts das erste Bild mit überlagerter zweiter Ebene (50 %) und einer Messung. Synthetische Testdaten.</figcaption></figure>
+  <div class="step-h"><span class="k">Schritt 4</span><span class="tt">Überlagerung übernehmen</span></div>
+  <ol class="steps">
+    <li>Klicken Sie im rechten Bild auf <span class="ui">„Überlagerung zur weiteren Überarbeitung übernehmen“</span>.</li>
+    <li>Die Ansicht wechselt in ein einzelnes großes Bildfeld; das linke Auswahlfeld wird ausgeblendet.</li>
+    <li>Messen, zoomen, drehen und maskieren Sie nun wie gewohnt weiter.</li>
+  </ol>
+  <div class="step-h"><span class="k">Schritt 5</span><span class="tt">Überlagertes Bild exportieren</span></div>
+  <ol class="steps">
+    <li>Der Knopf <span class="ui">„Überlagerung exportieren“</span> in der Werkzeugleiste ist jetzt aktiv und orange hervorgehoben.</li>
+    <li>Klicken Sie darauf und wählen Sie <span class="ui">„Mit Annotationen“</span> oder <span class="ui">„Ohne Annotationen“</span>.</li>
+    <li>Die Darstellung wird als JPEG in Originalauflösung in Ihren Download-Ordner gespeichert – mit neutralem Dateinamen ohne Patientennamen.</li>
+  </ol>
+  <figure><img src="img/f3-overlay-final.png" alt="" /><figcaption>Abb. 3 · Übernommene Überlagerung im 1-Feld-Modus; der Export-Knopf ist hervorgehoben. Synthetische Testdaten.</figcaption></figure>
+  <div class="card"><div class="ct">Gut zu wissen</div>
+    <ul>
+      <li>Die zweite Ebene wird mit ihrer aktuellen Fensterung und ihren Masken übernommen. Stellen Sie die Fensterung links ein, bevor Sie übernehmen.</li>
+      <li>Sie wird zentriert in die Fläche des ersten Bildes eingepasst. Eine automatische geometrische Ausrichtung (Registrierung) findet nicht statt.</li>
+      <li>Die Überlagerung ist an das erste Bild gebunden. Blättern Sie im Überlagerungsfeld weg, verschwindet sie; beim Zurückblättern ist sie wieder da.</li>
+      <li>Messungen auf der Überlagerung gehören zum ersten Bild und nutzen dessen Maßstab. Zum Beenden des Modus klicken Sie erneut auf „Überlagern“.</li>
+    </ul>
+  </div>
+
+  <h2>Neues Erscheinungsbild</h2>
+  <ul>
+    <li>Die App heißt jetzt <b>DICOMView</b>; der Name steht oben rechts in der Kopfleiste.</li>
+    <li>Die Kopfleiste ist größer. In schmaleren Fenstern (unter ca. 1440 px) zeigen ihre Knöpfe nur das Symbol, der Name erscheint beim Überfahren mit der Maus.</li>
+    <li>Die Startfläche zum Hochladen ist in den Markenfarben gestaltet. Sobald Bilder geladen sind, bleibt der Bildbereich neutral dunkel.</li>
+    <li>Beim Wechsel zwischen 1, 2 und 4 Bildfeldern passt sich das Bild automatisch an die neue Feldgröße an.</li>
+  </ul>
+</section>
+
+<!-- ============ 03 ============ -->
+<section class="chapter">
+  <div class="eb">03 · Erste Schritte</div>
+  <h1 class="h">In einer Minute zum ersten Bild</h1>
+  <p class="lead">App öffnen, Dateien oder einen Ordner in die Startfläche ziehen, im Importdialog „OK“ klicken – die erste Serie wird automatisch angezeigt.</p>
+  <figure><img src="img/02-ct.png" alt="" /><figcaption>Abb. 4 · Aufbau der Oberfläche mit geladener CT-Serie. Synthetische Testdaten.</figcaption></figure>
+  <table>
+    <tr><th>Bereich</th><th>Inhalt</th></tr>
+    <tr><td class="k">Kopfleiste</td><td>Import (Dateien…, Ordner…), Layout 1/2/4 Felder, MPR, Screenshot, Video, nächste Löschung, Sprache, Einstellungen, rechter Bereich ein/aus; ganz rechts der Name DICOMView</td></tr>
+    <tr><td class="k">Patienten</td><td>Patienten und ihre Untersuchungen, neueste zuerst</td></tr>
+    <tr><td class="k">Serien</td><td>Vorschaubilder der Serien der gewählten Untersuchung</td></tr>
+    <tr><td class="k">Werkzeugleiste</td><td>Blättern, Fensterung, Zoom, Verschieben, Messwerkzeuge, Maske, Drehen, Spiegeln, Presets, Ausschnitt, Überlagern</td></tr>
+    <tr><td class="k">Bildbereich</td><td>Ein, zwei oder vier Bildfelder; das aktive Feld ist türkis umrandet</td></tr>
+    <tr><td class="k">Eigenschaften</td><td>Fensterung, Messungen, ausgewählte Messung, Kalibrierung, Maskierung, Patientendaten-Einblendung</td></tr>
+  </table>
+  <p>Patienten, Serien und Eigenschaften lassen sich mit dem Pfeil in ihrer Kopfzeile einklappen. Im Bildfeld stehen oben links Modalität und Serienname, oben rechts Bildnummer, Fensterbreite (WW), Fensterzentrum (WL) und Zoom, unten links der aktive Maßstab, darunter ein Schieberegler zum Blättern.</p>
+</section>
+
+<!-- ============ 04 ============ -->
+<section class="chapter">
+  <div class="eb">04 · Import</div>
+  <h1 class="h">Bilder importieren</h1>
+  <p class="lead">Importieren Sie einzelne Dateien, ganze Ordner mit Unterordnern oder ZIP-Archive – per Drag &amp; Drop oder über „Dateien…“ bzw. „Ordner…“ in der Kopfleiste.</p>
+  <ol class="steps">
+    <li>Ziehen Sie Dateien, einen Ordner (z. B. eine Patienten-CD) oder ein ZIP-Archiv in das Browserfenster, oder klicken Sie auf <span class="ui">Dateien…</span> bzw. <span class="ui">Ordner…</span>.</li>
+    <li>Der Importdialog zeigt den Fortschritt. Mit <span class="ui">Abbrechen</span> stoppen Sie den Import; bereits importierte Dateien bleiben erhalten.</li>
+    <li>Am Ende sehen Sie, wie viele Bilder importiert und wie viele Duplikate übersprungen wurden, sowie Hinweise zu nicht lesbaren Dateien.</li>
+    <li>Klicken Sie <span class="ui">OK</span>.</li>
+  </ol>
+  <figure><img src="img/01-import.png" alt="" /><figcaption>Abb. 5 · Importergebnis mit verständlichen Hinweisen zu fehlerhaften Dateien. Synthetische Testdaten.</figcaption></figure>
+  <p><b>Unterstützte Formate:</b> DICOM (auch ohne Dateiendung, mit den gängigen Kompressionen JPEG, JPEG-LS, JPEG 2000, RLE, Deflate), JPEG, PNG und BMP sowie ZIP-Archive mit diesen Dateien. Ein DICOMDIR wird erkannt; die Zuordnung erfolgt über die Angaben in den einzelnen Dateien.</p>
+  <h3>Fotos und Bilddateien zuordnen</h3>
+  <p>JPEG-, PNG- und BMP-Dateien enthalten keine Patientenangaben. Nach dem Import öffnet sich deshalb der Dialog <span class="ui">Bilddateien zuordnen</span>:</p>
+  <ol class="steps">
+    <li>Wählen Sie <span class="ui">Bestehender Patient</span> oder <span class="ui">Neuer Patient</span> (Name/Bezeichnung, optional eine ID).</li>
+    <li>Wählen Sie <span class="ui">Bestehende Untersuchung</span> oder <span class="ui">Neue Untersuchung</span> mit Datum und Beschreibung.</li>
+    <li>Klicken Sie <span class="ui">Zuordnen</span>. Mit <span class="ui">Später</span> landen die Bilder unter einem eigenen Eintrag.</li>
+  </ol>
+  <div class="card"><div class="ct">Hinweise</div>
+    <ul>
+      <li>Eine fehlerhafte Datei bricht den Import nicht ab; sie erscheint mit Begründung in der Hinweisliste.</li>
+      <li>Bereits vorhandene Bilder werden als Duplikat erkannt und nicht doppelt gespeichert.</li>
+      <li>Sehr große oder ungewöhnlich stark komprimierte ZIP-Archive werden zum Schutz nicht entpackt.</li>
+      <li>Einzelne Dateien dürfen bis zu 600 MB groß sein; die Gesamtmenge regelt das Arbeitslimit (Kapitel 11).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 05 + 06 ============ -->
+<section class="chapter">
+  <div class="eb">05 · Patienten und Serien</div>
+  <h1 class="h">Patienten, Untersuchungen und Serien</h1>
+  <p class="lead">Die Daten sind geordnet nach Patient → Untersuchung → Serie → Einzelbilder. Patienten werden über ihre Patienten-ID zugeordnet; zwei Personen mit gleichem Namen werden nie zusammengeführt.</p>
+  <ul>
+    <li><b>Untersuchung öffnen:</b> Klicken Sie links auf eine Untersuchung. Sie sehen zuerst das Datum, darunter Körperregion/Modalität und Beschreibung. Die Untersuchungen eines Patienten stehen neueste zuerst.</li>
+    <li><b>Serie anzeigen:</b> Klicken Sie in der Serienliste auf ein Vorschaubild – die Serie erscheint im aktiven Bildfeld – oder ziehen Sie es in ein beliebiges Feld. Unter dem Vorschaubild stehen Bezeichnung, Modalität, Orientierung (AX, COR, SAG) und Bildanzahl; „▸ 1“ zeigt, in welchem Feld die Serie läuft.</li>
+    <li><b>Entfernen:</b> Mit dem Papierkorb neben einem Patienten oder einer Untersuchung entfernen Sie diese aus dem lokalen Arbeitsbestand. Ihre Originaldateien bleiben unverändert.</li>
+  </ul>
+</section>
+
+<section class="chapter cont">
+  <div class="eb">06 · Bilder betrachten</div>
+  <h1 class="h">Bilder betrachten</h1>
+  <p class="lead">Alle Darstellungsänderungen sind nicht-destruktiv; die Originaldaten bleiben unverändert.</p>
+  <table>
+    <tr><th>Aktion</th><th>Maus / Trackpad</th><th>Werkzeugleiste / Taste</th></tr>
+    <tr><td class="k">Blättern</td><td>Mausrad, Zwei-Finger-Scrollen, Schieberegler</td><td>Blättern <kbd>S</kbd>, Pfeiltasten, <kbd>Bild↑</kbd> <kbd>Bild↓</kbd></td></tr>
+    <tr><td class="k">Zoom</td><td>Strg + Scrollen, Pinch, rechte Maustaste ziehen</td><td>Zoom <kbd>Z</kbd></td></tr>
+    <tr><td class="k">Verschieben</td><td>mittlere Maustaste ziehen</td><td>Verschieben <kbd>P</kbd></td></tr>
+    <tr><td class="k">Helligkeit/Kontrast</td><td>Shift + Ziehen</td><td>Fensterung <kbd>W</kbd></td></tr>
+    <tr><td class="k">Invertieren</td><td>–</td><td><kbd>I</kbd></td></tr>
+    <tr><td class="k">Drehen</td><td>–</td><td><kbd>R</kbd> · <kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
+    <tr><td class="k">Spiegeln</td><td>–</td><td>horizontal <kbd>H</kbd> · vertikal <kbd>V</kbd></td></tr>
+    <tr><td class="k">Anpassen / Zurücksetzen</td><td>–</td><td><kbd>F</kbd> · <kbd>0</kbd></td></tr>
+  </table>
+  <p><b>Fensterung:</b> Mit dem Werkzeug Fensterung verändert horizontales Ziehen den Kontrast, vertikales die Helligkeit. Bei CT stehen unter <span class="ui">Fensterpresets</span> Werte für Weichteil, Lunge, Knochen, Gehirn, Abdomen, Leber und Mediastinum bereit; <span class="ui">Standard (DICOM)</span> stellt die Werte aus der Datei wieder her. Exakte Werte geben Sie rechts unter Fensterung (WW/WL) ein.</p>
+  <p><b>Mehrere Bildfelder:</b> Mit den Layout-Knöpfen (oder <kbd>1</kbd> <kbd>2</kbd> <kbd>4</kbd>) wechseln Sie zwischen einem, zwei und vier Feldern. Ein Klick in ein Feld macht es zum aktiven Feld (türkis Rahmen); Werkzeuge, Presets und Export beziehen sich auf dieses Feld.</p>
+</section>
+
+<!-- ============ 07 ============ -->
+<section class="chapter">
+  <div class="eb">07 · Messen</div>
+  <h1 class="h">Messen und Kalibrieren</h1>
+  <p class="lead">Vier Messwerkzeuge stehen zur Verfügung. Werte erscheinen in Millimetern, wenn ein gültiger Maßstab vorliegt, sonst in Pixeln. Flächenmessungen gibt es bewusst nicht.</p>
+  <table>
+    <tr><th>Werkzeug</th><th>Taste</th><th>So geht’s</th></tr>
+    <tr><td class="k">Länge</td><td><kbd>L</kbd></td><td>Vom Start- zum Endpunkt ziehen</td></tr>
+    <tr><td class="k">Winkel (3 Punkte)</td><td><kbd>A</kbd></td><td>Drei Punkte nacheinander klicken; der mittlere ist der Scheitel</td></tr>
+    <tr><td class="k">2-Linien-Winkel</td><td><kbd>C</kbd></td><td>Erste Linie ziehen, dann zweite – die Linien müssen sich nicht berühren</td></tr>
+    <tr><td class="k">Kreis</td><td><kbd>O</kbd></td><td>Vom Mittelpunkt zum Rand ziehen; angezeigt wird der Durchmesser Ø</td></tr>
+  </table>
+  <p><b>Bearbeiten:</b> Klicken Sie eine Messung an, um sie auszuwählen. Ziehen Sie an einem Endpunkt, um sie zu ändern, an der Linie, um sie zu verschieben, oder am Textfeld, um die Beschriftung zu versetzen. <kbd>Entf</kbd> löscht die ausgewählte Messung; das Augen-Symbol blendet alle Messungen aus und ein.</p>
+  <p><b>2-Linien-Winkel:</b> Unter <span class="ui">Ausgewählte Messung → Angezeigter Winkel</span> wählen Sie Innenwinkel (≤ 90°), Ergänzungswinkel (≥ 90°) oder Beide; die Beschriftung zeigt eindeutig „(innen)“ bzw. „(Ergänzung)“.</p>
+  <figure><img src="img/04-jpeg-angles.png" alt="" /><figcaption>Abb. 6 · 2-Linien-Winkel mit Innen- und Ergänzungswinkel; rechts die Kalibrierung „bekannte Strecke“. Synthetische Testdaten.</figcaption></figure>
+
+  <h2>Maßstab und Kalibrierung</h2>
+  <p>Rechts unter <span class="ui">Längenkalibrierung</span> sehen Sie den aktiven Maßstab und seine Herkunft, z. B. „DICOM Pixel Spacing (Objektebene)“. Ohne gültigen Maßstab, etwa bei Fotos, zeigt die App nur Pixelwerte. Manuelle Kalibrierungen gelten zunächst nur für das aktuelle Bild.</p>
+  <div class="step-h"><span class="k">A</span><span class="tt">Referenzkugel</span></div>
+  <ol class="steps">
+    <li>Zeichnen Sie mit <span class="ui">Kreis</span> einen Kreis passgenau um die Kugel und klicken Sie ihn an.</li>
+    <li>Wählen Sie <span class="ui">Referenzkugel</span>, geben Sie den tatsächlichen Durchmesser in mm ein und klicken Sie <span class="ui">Zusammenfassung</span>.</li>
+    <li>Prüfen Sie bisherigen und neuen Maßstab und klicken Sie <span class="ui">Übernehmen</span>.</li>
+  </ol>
+  <div class="step-h"><span class="k">B</span><span class="tt">Vergrößerungsfaktor 1,1</span></div>
+  <p>Konvention: Abbildungslänge = Objektlänge × 1,1. Der Faktor ist nur verfügbar, wenn das Bild eine physikalisch bekannte Abbildungslänge hat (z. B. Röntgen mit Imager Pixel Spacing). Ohne Maßstab oder wenn die Vergrößerung bereits berücksichtigt ist, wird er mit Begründung abgelehnt und nie doppelt angewendet.</p>
+  <ol class="steps">
+    <li>Wählen Sie <span class="ui">Vergrößerungsfaktor 1,1</span> und klicken Sie <span class="ui">Faktor 1,1 anwenden</span>.</li>
+    <li>Messwerte tragen dann den Zusatz „(÷1,1)“, unten im Bild steht „×1/1,1“.</li>
+  </ol>
+  <div class="step-h"><span class="k">C</span><span class="tt">Bekannte Strecke</span></div>
+  <ol class="steps">
+    <li>Markieren Sie die Strecke mit <span class="ui">Länge</span> und klicken Sie sie an.</li>
+    <li>Wählen Sie <span class="ui">Bekannte Strecke</span>, geben Sie die tatsächliche Länge in mm ein, klicken Sie <span class="ui">Zusammenfassung</span> und <span class="ui">Übernehmen</span>.</li>
+  </ol>
+  <p><b>Auf Serie übertragen:</b> Nach einer manuellen Kalibrierung erscheint <span class="ui">Auf ganze Serie übertragen</span> – nur möglich, wenn alle Bilder der Serie dieselbe Geometrie haben. <span class="ui">Manuelle Kalibrierung entfernen</span> stellt den ursprünglichen Maßstab wieder her.</p>
+</section>
+
+<!-- ============ 08 ============ -->
+<section class="chapter">
+  <div class="eb">08 · Maskieren</div>
+  <h1 class="h">Patientendaten maskieren</h1>
+  <p class="lead">Eingebrannte Schrift wie Name, Geburtsdatum oder Klinik decken Sie mit Masken ab. Masken ersetzen beim Export die Pixel tatsächlich und bleiben auch bei späterer Aufhellung deckend.</p>
+  <ol class="steps">
+    <li>Wählen Sie das Werkzeug <span class="ui">Maske</span> (<kbd>M</kbd>).</li>
+    <li>Legen Sie rechts unter <span class="ui">Maskierung</span> fest, ob neue Masken für <span class="ui">dieses Bild</span> oder die <span class="ui">ganze Serie</span> gelten.</li>
+    <li>Wählen Sie die Füllfarbe: Schwarz, eine freie Farbe oder mit der <span class="ui">Pipette</span> die Hintergrundfarbe direkt neben der Schrift.</li>
+    <li>Ziehen Sie im Bild ein Rechteck über die Schrift.</li>
+    <li>Zum Verschieben in die Maske klicken und ziehen, zum Skalieren an einer weißen Ecke ziehen; <kbd>Entf</kbd> löscht die ausgewählte Maske.</li>
+    <li>Prüfen Sie Serienmasken, indem Sie durch die Serie blättern.</li>
+  </ol>
+  <figure><img src="img/05-mask.png" alt="" /><figcaption>Abb. 7 · Serienmaske über der eingebrannten Beschriftung oben links. Synthetische Testdaten.</figcaption></figure>
+  <div class="card warn"><div class="ct">Wichtig</div>Die manuelle Maskierung ist keine Garantie für eine vollständige Anonymisierung. Bei ungleichmäßigem Hintergrund kann die einfarbige Fläche sichtbar bleiben. Prüfen Sie vor jedem Export die Vorschau. Eingeblendete Patientendaten und DICOM-Overlays werden nie exportiert; „Alle Annotationen löschen“ entfernt keine Masken.</div>
+</section>
+
+<!-- ============ 09 ============ -->
+<section class="chapter">
+  <div class="eb">09 · Export</div>
+  <h1 class="h">Exportieren: Screenshot und Video</h1>
+  <p class="lead">Exporte landen über den normalen Browser-Download in Ihrem Download-Ordner, mit neutralem Dateinamen ohne Patientennamen. Werkzeugleisten, Listen und eingeblendete Patientendaten werden nie exportiert; Masken sind immer enthalten.</p>
+  <h2>Screenshot</h2>
+  <ol class="steps">
+    <li>Klicken Sie in der Kopfleiste auf <span class="ui">Screenshot</span>.</li>
+    <li>Wählen Sie den Bereich: <span class="ui">Aktives Bildfeld</span>, <span class="ui">Gesamte Vergleichsansicht</span> (bei 2 oder 4 Feldern) oder <span class="ui">Gewählter Ausschnitt</span> – dafür <span class="ui">Ausschnitt wählen</span> klicken und im Bild ein Rechteck aufziehen.</li>
+    <li>Haken Sie <span class="ui">Mit Messungen und Annotationen</span> an oder ab.</li>
+    <li>Wählen Sie die Auflösung: <span class="ui">Originalauflösung</span> (1 Bildpunkt = 1 Exportpunkt) oder 1–4-fache Bildschirmgröße; die Pixelzahl wird angezeigt.</li>
+    <li>Wählen Sie PNG oder JPEG (mit einstellbarer Qualität).</li>
+    <li>Prüfen Sie die <span class="ui">Vorschau</span> auf sichtbare Patientendaten und klicken Sie <span class="ui">Herunterladen</span>.</li>
+  </ol>
+  <h2>Video</h2>
+  <ol class="steps">
+    <li>Klicken Sie auf <span class="ui">Video</span>. Ein kleines Fenster öffnet sich unten rechts; das Bild bleibt bedienbar.</li>
+    <li>Wählen Sie Bereich, ob Messungen enthalten sein sollen, und die maximale Dauer (30 Sekunden bis 10 Minuten).</li>
+    <li>Klicken Sie <span class="ui">Aufnahme starten</span>. Die Serie wird zuerst vollständig geladen, damit beim schnellen Blättern keine fehlenden Bilder ins Video gelangen.</li>
+    <li>Blättern Sie während der Aufnahme manuell durch die Serie; die Dauer läuft sichtbar mit.</li>
+    <li>Klicken Sie <span class="ui">Stoppen &amp; speichern</span> – oder <span class="ui">Verwerfen</span>.</li>
+  </ol>
+  <p>Das Video wird als MP4 (H.264) mit 30 Bildern pro Sekunde in Bildschirmauflösung gespeichert; der Mauszeiger wird nicht aufgenommen. Bei Erreichen der Höchstdauer oder 500 MB stoppt und speichert die Aufnahme automatisch. Kann ein Browser kein MP4 erzeugen, speichert die App sichtbar gekennzeichnet als WebM. Den JPEG-Export der Überlagerung beschreibt Kapitel 02, Schritt 5.</p>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="chapter">
+  <div class="eb">10 · MPR</div>
+  <h1 class="h">MPR – multiplanare Rekonstruktion</h1>
+  <p class="lead">Aus einer CT- oder MRT-Schnittbildserie erzeugt MPR gleichzeitig eine axiale, koronare und sagittale Ansicht.</p>
+  <ol class="steps">
+    <li>Laden Sie die Serie in das aktive Bildfeld und klicken Sie in der Kopfleiste auf <span class="ui">MPR</span>.</li>
+    <li>Mit dem Werkzeug <span class="ui">MPR</span> (Fadenkreuz) klicken oder ziehen Sie in einer Ansicht; die beiden anderen springen an dieselbe Stelle.</li>
+    <li>Blättern, Fensterung, Zoom, Verschieben und Fensterpresets funktionieren wie gewohnt.</li>
+    <li><span class="ui">Zurück zum Viewer</span> beendet die Ansicht.</li>
+  </ol>
+  <figure><img src="img/06-mpr.png" alt="" /><figcaption>Abb. 8 · MPR mit gekoppelten Fadenkreuzen. Synthetische Testdaten.</figcaption></figure>
+  <p>Geeignet sind Serien mit mindestens 10 Schichten, einheitlicher Orientierung und Bildgröße sowie gleichmäßigem Schichtabstand. Andere Serien werden mit Begründung abgelehnt. In der MPR-Ansicht sind keine Messungen und kein Export möglich.</p>
+</section>
+
+<!-- ============ 11 ============ -->
+<section class="chapter">
+  <div class="eb">11 · Speicher und Löschung</div>
+  <h1 class="h">Speicher, tägliche Löschung und Einstellungen</h1>
+  <p class="lead">Die Einstellungen öffnen Sie mit dem Zahnrad oben rechts. Ihre Originaldateien und bereits heruntergeladene Exporte bleiben immer erhalten.</p>
+  <h3>Speicher</h3>
+  <p>Importierte Bilder werden lokal im Browser zwischengespeichert, standardmäßig bis zu einem Arbeitslimit von 1 GB (einstellbar von 256 MB bis 4 GB). Wird Platz benötigt, entfernt die App automatisch die am längsten nicht genutzten Untersuchungen und weist darauf hin. Angezeigte Untersuchungen sind geschützt; reicht der Platz trotzdem nicht, stoppt der Import mit einer Erklärung.</p>
+  <h3>Tägliche Löschung</h3>
+  <p>Standardmäßig wird der gesamte lokale Arbeitsbestand – Bilder, Listen, Vorschauen, Messungen, Kalibrierungen und Masken – jeden Tag um 23:59 Uhr gelöscht. War der Browser geschlossen oder das Gerät im Ruhezustand, erfolgt die Löschung beim nächsten Öffnen, bevor alte Daten angezeigt werden. Offene Tabs löschen gemeinsam. Die nächste Löschung steht in der Kopfleiste.</p>
+  <ul>
+    <li>Uhrzeit ändern oder abschalten: in den Einstellungen unter <span class="ui">Automatische tägliche Löschung</span>. Ist sie aus, zeigt die Kopfleiste das deutlich an.</li>
+    <li>Sofort löschen: <span class="ui">Alle lokalen Daten jetzt löschen</span>. Es gibt keinen Papierkorb.</li>
+    <li>Ein forensisch sicheres Überschreiben der Festplatte findet nicht statt.</li>
+  </ul>
+  <h3>Weitere Einstellungen</h3>
+  <p>Sprache (Deutsch/Englisch). Einstellungen ohne Patientenbezug – Sprache, Limit, Löschzeit, Messungs-Optionen und Schriftstil – bleiben auch nach der Löschung erhalten.</p>
+</section>
+
+<!-- ============ 12 ============ -->
+<section class="chapter">
+  <div class="eb">12 · Tastenkürzel</div>
+  <h1 class="h">Tastenkürzel</h1>
+  <p class="lead">Die Kürzel wirken auf das aktive Bildfeld, solange kein Eingabefeld ausgewählt ist.</p>
+  <table>
+    <tr><th style="width:38%">Taste</th><th>Funktion</th></tr>
+    <tr><td><kbd>S</kbd> <kbd>W</kbd> <kbd>Z</kbd> <kbd>P</kbd></td><td>Blättern · Fensterung · Zoom · Verschieben</td></tr>
+    <tr><td><kbd>L</kbd> <kbd>A</kbd> <kbd>C</kbd> <kbd>O</kbd></td><td>Länge · Winkel · 2-Linien-Winkel · Kreis</td></tr>
+    <tr><td><kbd>M</kbd></td><td>Maske</td></tr>
+    <tr><td><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd></td><td>Ein Bild zurück / vor</td></tr>
+    <tr><td><kbd>Bild↑</kbd> <kbd>Bild↓</kbd></td><td>10 Bilder zurück / vor</td></tr>
+    <tr><td><kbd>Pos1</kbd> <kbd>Ende</kbd></td><td>Erstes / letztes Bild</td></tr>
+    <tr><td><kbd>I</kbd></td><td>Invertieren</td></tr>
+    <tr><td><kbd>R</kbd> · <kbd>Shift</kbd>+<kbd>R</kbd></td><td>Rechts / links drehen</td></tr>
+    <tr><td><kbd>H</kbd> <kbd>V</kbd></td><td>Horizontal / vertikal spiegeln</td></tr>
+    <tr><td><kbd>F</kbd> · <kbd>0</kbd></td><td>An Bildfeld anpassen · Ansicht zurücksetzen</td></tr>
+    <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>4</kbd></td><td>Ein / zwei / vier Bildfelder</td></tr>
+    <tr><td><kbd>Entf</kbd></td><td>Ausgewählte Messung bzw. Maske löschen</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Pipette bzw. Ausschnitt abbrechen</td></tr>
+  </table>
+</section>
+
+<!-- ============ 13 ============ -->
+<section class="chapter faq">
+  <div class="eb">13 · Häufige Fragen</div>
+  <h1 class="h">Grenzen und häufige Fragen</h1>
+  <h3>Warum sehe ich nur „px“ statt Millimeter?</h3>
+  <p>Das Bild hat keinen gültigen Maßstab, typisch bei Fotos. Kalibrieren Sie mit Referenzkugel oder bekannter Strecke.</p>
+  <h3>Warum ist der Vergrößerungsfaktor 1,1 gesperrt?</h3>
+  <p>Entweder fehlt eine physikalische Basis, oder der Maßstab berücksichtigt die Vergrößerung bereits. Der Faktor wird nie doppelt angewendet.</p>
+  <h3>Meine gestrichelte Messung lässt sich nicht verschieben.</h3>
+  <p>Gestrichelte Messungen sind mitgeführte Anzeigen. Blättern Sie zum Ursprungsbild; dort ist die Linie durchgezogen und bearbeitbar.</p>
+  <h3>Die Überlagerung ist verschwunden.</h3>
+  <p>Sie ist an das erste Bild gebunden. Blättern Sie im Überlagerungsfeld zurück zu diesem Bild.</p>
+  <h3>Meine Bilder sind am nächsten Tag weg.</h3>
+  <p>Das ist die automatische tägliche Löschung um 23:59 Uhr. Sie lässt sich in den Einstellungen abschalten; sonst importieren Sie einfach erneut.</p>
+  <h3>Ein Bild zeigt „kann nicht dargestellt werden“.</h3>
+  <p>Die Kodierung wird nicht unterstützt (z. B. unkomprimiertes YBR_FULL_422) oder die Datei ist beschädigt.</p>
+  <div class="card warn"><div class="ct">Bekannte Grenzen</div>
+    <ul>
+      <li>Nicht für die diagnostische Befundung bestimmt.</li>
+      <li>Keine PACS-Anbindung, kein DICOM-Export, keine Druckfunktion, keine Flächenmessung, kein 3D-Volumenrendering.</li>
+      <li>DICOM-Overlays werden weder angezeigt noch exportiert.</li>
+      <li>Beim Überlagern keine automatische Registrierung der Bilder.</li>
+      <li>Safari ist bisher weniger ausführlich getestet als Chrome; Windows und iPad folgen in einer späteren Version.</li>
+    </ul>
+  </div>
+</section>
+
+</body>
+</html>
